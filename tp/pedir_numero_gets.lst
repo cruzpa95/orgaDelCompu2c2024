@@ -1,0 +1,29 @@
+     1                                  global main
+     2                                  extern gets
+     3                                  extern printf
+     4                                  
+     5                                  section .data
+     6 00000000 557374656420696E67-         msj		db	'Usted ingreso %s !!',10,0
+     6 00000009 7265736F2025732021-
+     6 00000012 210A00             
+     7                                  section .bss
+     8 00000000 <res 64h>                   input resb 100       ; Reserve 100 bytes for input
+     9                                  
+    10                                  section .text
+    11                                  main:
+    12 00000000 4889E5                      mov rbp, rsp; for correct debugging
+    13 00000003 4883EC08                    sub rsp, 8            ; Align stack for calling conventions
+    14 00000007 48BF-                       mov rdi, input
+    14 00000009 [0000000000000000] 
+    15 00000011 E8(00000000)                call gets
+    16                                      
+    17                                      
+    18 00000016 48BF-                       mov rdi, msj
+    18 00000018 [0000000000000000] 
+    19 00000020 48BE-                       mov rsi, input
+    19 00000022 [0000000000000000] 
+    20 0000002A E8(00000000)                call printf
+    21                                      
+    22 0000002F 4883C408                    add rsp, 8            ; Restore stack alignment
+    23 00000033 C3                          ret
+    24                                     

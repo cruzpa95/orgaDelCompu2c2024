@@ -1,0 +1,318 @@
+     1                                  global main
+     2                                  extern fopen
+     3                                  extern fread
+     4                                  extern fclose
+     5                                  extern puts
+     6                                  extern printf 
+     7                                  
+     8                                  section .data ; Elementos Inicializados
+     9                                  ; Mensajes para mostrar en pantalla
+    10 00000000 456C20617263686976-         mensajeErrorArchivo     	db "El archivo no se abrio correctamente", 0
+    10 00000009 6F206E6F2073652061-
+    10 00000012 6272696F20636F7272-
+    10 0000001B 656374616D656E7465-
+    10 00000024 00                 
+    11 00000025 4C61206D6178696D61-         mensajeSumatoriaMaxima  	db "La maxima sumatoria de las diagonales principales de las submatrices es %i", 0
+    11 0000002E 2073756D61746F7269-
+    11 00000037 61206465206C617320-
+    11 00000040 646961676F6E616C65-
+    11 00000049 73207072696E636970-
+    11 00000052 616C6573206465206C-
+    11 0000005B 6173207375626D6174-
+    11 00000064 726963657320657320-
+    11 0000006D 256900             
+    12 00000070 2F686F6D652F706162-         fileName    				db "/home/pablo/orga/parcial/ejemploParcial/submat.dat", 0
+    12 00000079 6C6F2F6F7267612F70-
+    12 00000082 61726369616C2F656A-
+    12 0000008B 656D706C6F50617263-
+    12 00000094 69616C2F7375626D61-
+    12 0000009D 742E64617400       
+    13                                  ; Modo para abrir el archivo binario
+    14 000000A3 726200                      modo    					db "rb", 0
+    15                                  ; Matriz de 20x20 inicializada
+    16 000000A6 010203040506070809-         matriz      				times 20 	db 1,2,3,4,5,6,7,8,9,10,-1,-2,-3,-4,-5,-6,-7,-8,-9,-10
+    16 000000AF 0AFFFEFDFCFBFAF9F8-
+    16 000000B8 F7F6<rep 14h>      
+    17                                  ; Inicializo la mayor sumatoria al menor valor posible (-128x20)
+    18 00000236 00F6FFFF                    mayorSumatoria      		dd 		-2560    
+    19                                  
+    20                                  section .bss ; Elementos sin inicializar
+    21 00000000 ????                        regFila     				resw 1
+    22 00000002 ????                        regColumna    				resw 1
+    23 00000004 ????                        regDimension     			resw 1
+    24 00000006 ????????????????            idArchivo   				resq 1
+    25 0000000E ????????????                registro                    resb 6
+    26 00000014 ????                        fila    					resw 1
+    27 00000016 ????                        columna     				resw 1
+    28 00000018 ????????????????            desplazamiento  			resq 1
+    29 00000020 ??                          registroValido  			resb 1
+    30 00000021 ??                          datoValido  				resb 1
+    31 00000022 ??                          subMatrizValida     		resb 1
+    32 00000023 ????                        cantidadDeElementosSumados  resw 1
+    33 00000025 ????????                    sumatoriaDiagonal   		resd 1    
+    34                                      
+    35                                  section .text
+    36                                  main:
+    37                                  ; Abro el archivo
+    38 00000000 48BF-                       mov     rdi, fileName
+    38 00000002 [7000000000000000] 
+    39 0000000A 48BF-                       mov     rdi, modo
+    39 0000000C [A300000000000000] 
+    40 00000014 4883EC08                    sub     rsp, 8
+    41 00000018 E8(00000000)                call    fopen
+    42 0000001D 4883C408                    add     rsp, 8
+    43 00000021 4883F800                    cmp     rax, 0
+    44 00000025 0F8E8D000000                jle     errorOpenFile
+    45 0000002B 48890425[06000000]          mov     qword[idArchivo], rax    
+    46                                  
+    47                                  ; Leo un registro
+    48                                  leerRegistro:
+    49                                  ; rdi, rsi, rdx, rcx r8 r9
+    50 00000033 48BF-                       mov     rdi, registro
+    50 00000035 [0E00000000000000] 
+    51 0000003D BE06000000                  mov     rsi, 6
+    52 00000042 BA01000000                  mov     rdx, 1
+    53 00000047 488B0C25[06000000]          mov     rcx, [idArchivo]
+    54 0000004F 4883EC08                	sub     rsp, 8
+    55 00000053 E8(00000000)                call    fread
+    56 00000058 4883C408                    add     rsp, 8
+    57 0000005C 4883F800                    cmp     rax, 0	; Verifico que el FileHandler sea un numero positivo (apertura OK)
+    58 00000060 7E33                        jle     finArchivo
+    59                                  
+    60                                  ; Validacion del registro leido
+    61 00000062 4883EC08                    sub     rsp, 8
+    62 00000066 E866000000                  call    VALSM
+    63 0000006B 4883C408                    add     rsp, 8
+    64                                  
+    65                                  ; Si el registro no es valido, leo el siguiente registro
+    66 0000006F 803C25[20000000]4E      	cmp     byte[registroValido], 'N'
+    67 00000077 74BA                        je      leerRegistro
+    68                                  
+    69                                  ; Si el registro es valido, calculo la sumatoria de la diagonal
+    70                                  ; en [SumatoriaDiagonal] queda el resultado de la sumatoria
+    71 00000079 4883EC08                    sub     rsp, 8
+    72 0000007D E873020000                  call    calcularSumatoria
+    73 00000082 4883C408                    add     rsp, 8
+    74                                  
+    75                                  ; Verifico si la sumatoria calculada es mayor que la actual 
+    76 00000086 4883EC08                	sub     rsp, 8
+    77 0000008A E8CF020000                  call    determinarMayorSumatoria
+    78 0000008F 4883C408                    add     rsp, 8
+    79                                  	
+    80                                  ; leo el siguiente registro	
+    81 00000093 EB9E                        jmp     leerRegistro
+    82                                  
+    83                                  ; Cierro el archivo
+    84                                  finArchivo:
+    85 00000095 488B0C25[06000000]          mov     rcx, [idArchivo]
+    86 0000009D 4883EC08                    sub     rsp, 8
+    87 000000A1 E8(00000000)                call    fclose
+    88 000000A6 4883C408                    add     rsp, 8
+    89                                   
+    90                                  ; Muestro en pantalla la sumatoria mayor de las submatrices 
+    91 000000AA 4883EC08                    sub     rsp, 8
+    92 000000AE E8C3020000                  call    mostrarMayorSumatoria
+    93 000000B3 4883C408                    add     rsp, 8
+    94                                  
+    95                                  finDePrograma:
+    96 000000B7 C3                          ret
+    97                                  
+    98                                  
+    99                                  ; RUTINAS INTERNAS
+   100                                  ; Mensaje si falla la apertura de archivo
+   101                                  errorOpenFile:
+   102 000000B8 48BA-                       mov     rdx, mensajeErrorArchivo
+   102 000000BA [0000000000000000] 
+   103 000000C2 4883EC08                    sub     rsp, 8
+   104 000000C6 E8(00000000)                call    puts
+   105 000000CB 4883C408                    add     rsp, 8
+   106 000000CF EBE6                        jmp     finDePrograma
+   107                                  
+   108                                  ; Valido el registro leido
+   109                                  VALSM:  
+   110 000000D1 C60425[20000000]4E          mov     byte[registroValido], 'N'
+   111 000000D9 66448B0425-             	mov 	r8w,[registro] ; leo la fila a R8w (16 bits)
+   111 000000DE [0E000000]         
+   112 000000E2 66448B0C25-             	mov		r9w,[registro+2]; leo la columna a R9w (16 bits)
+   112 000000E7 [10000000]         
+   113 000000EB 66448B1425-             	mov		r10w, [registro+4]; leo la dimension a R10w (16 bits)
+   113 000000F0 [12000000]         
+   114                                  
+   115                                  ; paso los valores empaquetados a binarios puros
+   116                                  ; cargo en regFila, regColumna y regDimension los valores leidos
+   117 000000F4 6644890425-             	mov		[regFila], r8w; ; paso la fila a regFila
+   117 000000F9 [00000000]         
+   118 000000FD 6644890C25-             	mov		[regColumna], r9w; paso la columna a regColumna
+   118 00000102 [02000000]         
+   119 00000106 6644891425-             	mov		[regDimension], r10w; paso la dimension a regDimension
+   119 0000010B [04000000]         
+   120                                  
+   121                                  ; conversion de fila
+   122                                  ; ejemplo el nro 14 esta guardado como "0x04 0x01" en regFila
+   123 0000010F 41B800000000            	mov     r8,0x00
+   124 00000115 41B900000000                mov     r9,0x00
+   125 0000011B 448A0425[00000000]          mov     r8b,[regFila] ;en R8b guardo las unidades
+   126 00000123 448A0C25[0F000000]          mov     r9b,[registro+1] ;en r9b guardo las decenas
+   127 0000012B 4D6BC90A                    imul    r9,0x0A ; multiplico por 10 las decenas
+   128 0000012F 4500C8                      add     r8b,r9b   ; sumo las unidades
+   129 00000132 44880425[00000000]          mov     [regFila],r8b ; guardo regFila como binario puro
+   130                                  ; conversion de columna
+   131 0000013A 41B800000000                mov     r8,0x00
+   132 00000140 41B900000000                mov     r9,0x00
+   133 00000146 448A0425[10000000]          mov     r8b,[registro+2] ;en R8b guardo las unidades
+   134 0000014E 448A0C25[11000000]          mov     r9b,[registro+3] ;en r9b guardo las decenas
+   135 00000156 4D6BC90A                    imul    r9,0x0A ; multiplico por 10 las decenas
+   136 0000015A 4500C8                      add     r8b,r9b   ; sumo las unidades
+   137 0000015D 44880425[02000000]          mov     [regColumna],r8b ; guardo regColumna como binario puro
+   138                                  ; conversion de dimension
+   139 00000165 41B800000000                mov     r8,0x00
+   140 0000016B 41B900000000                mov     r9,0x00
+   141 00000171 448A0425[12000000]          mov     r8b,[registro+4] ;en R8b guardo las unidades
+   142 00000179 448A0C25[13000000]          mov     r9b,[registro+5] ;en r9b guardo las decenas
+   143 00000181 4D6BC90A                    imul    r9,0x0A ; multiplico por 10 las decenas
+   144 00000185 4500C8                      add     r8b,r9b   ; sumo las unidades
+   145 00000188 44880425[04000000]          mov     [regDimension],r8b ; guardo regDimension como binario puro
+   146                                  
+   147                                  ; Validacion del rango de los datos leidos
+   148 00000190 4883EC08                    sub     rsp, 8
+   149 00000194 E85C000000                  call    validarFila
+   150 00000199 4883C408                	add		rsp, 8
+   151 0000019D 803C25[21000000]4E          cmp     byte[datoValido], 'N'
+   152 000001A5 744D                        je      registroInvalido
+   153 000001A7 4883EC08                    sub     rsp, 8
+   154 000001AB E86C000000                  call    validarColumna
+   155 000001B0 4883C408                	add		rsp, 8
+   156 000001B4 803C25[21000000]4E          cmp     byte[datoValido], 'N'
+   157 000001BC 7436                        je      registroInvalido
+   158 000001BE 4883EC08                    sub     rsp, 8
+   159 000001C2 E87C000000                  call    validarDimension
+   160 000001C7 4883C408                	add		rsp, 8
+   161 000001CB 803C25[21000000]4E          cmp     byte[datoValido], 'N'
+   162 000001D3 741F                        je      registroInvalido
+   163                                  ; Validacion que la submatriz este contenida en la matriz
+   164 000001D5 4883EC08                    sub     rsp, 8
+   165 000001D9 E88C000000                  call    validarSubMatriz
+   166 000001DE 4883C408                	add		rsp, 8
+   167 000001E2 803C25[22000000]4E          cmp     byte[subMatrizValida], 'N'
+   168 000001EA 7408                        je      registroInvalido
+   169 000001EC C60425[20000000]53          mov     byte[registroValido], 'S'
+   170                                  registroInvalido:
+   171 000001F4 C3                          ret
+   172                                  
+   173                                  ; Validacion de la fila en el rango 1-20
+   174                                  validarFila:
+   175 000001F5 C60425[21000000]4E          mov     byte[datoValido], 'N' 
+   176 000001FD 66833C25[00000000]-         cmp     word[regFila], 1
+   176 00000205 01                 
+   177 00000206 7C13                        jl      filaInvalida
+   178 00000208 66833C25[00000000]-         cmp     word[regFila], 20
+   178 00000210 14                 
+   179 00000211 7F08                        jg      filaInvalida
+   180 00000213 C60425[21000000]53          mov     byte[datoValido], 'S'
+   181                                  filaInvalida:
+   182 0000021B C3                          ret
+   183                                  ; Validacion de la columna en el rango 1-20
+   184                                  validarColumna:
+   185 0000021C C60425[21000000]4E          mov     byte[datoValido], 'N'
+   186 00000224 66833C25[02000000]-         cmp     word[regColumna], 1
+   186 0000022C 01                 
+   187 0000022D 7C13                        jl      columnaInvalida
+   188 0000022F 66833C25[02000000]-         cmp     word[regColumna], 20
+   188 00000237 14                 
+   189 00000238 7F08                        jg      columnaInvalida
+   190 0000023A C60425[21000000]53          mov     byte[datoValido], 'S'
+   191                                  columnaInvalida:
+   192 00000242 C3                          ret
+   193                                  ; Validacion de la dimension en el rango 1-20
+   194                                  validarDimension:
+   195 00000243 C60425[21000000]4E          mov     byte[datoValido], 'N'
+   196 0000024B 66833C25[04000000]-         cmp     word[regDimension], 1
+   196 00000253 01                 
+   197 00000254 7C13                        jl      dimensionInvalida
+   198 00000256 66833C25[04000000]-         cmp     word[regDimension], 20
+   198 0000025E 14                 
+   199 0000025F 7F08                        jg      dimensionInvalida
+   200 00000261 C60425[21000000]53          mov     byte[datoValido], 'S'
+   201                                  dimensionInvalida:
+   202 00000269 C3                          ret
+   203                                  
+   204                                  ; Validacion que la submatriz este contenida en la matriz    
+   205                                  validarSubMatriz:
+   206                                  ; tengo las coordenadas de la esquina superior derecha de la matriz, 
+   207                                  ; si la fila de la coordenada mas la dimension de la submatriz menos 1 esta en el rango 1-20 y 
+   208                                  ; si la columna de la coordenada menos la dimension de la submatriz menos 1 esta en el rango 1-20
+   209                                  ; entonces la submatriz esta dentro de la matriz y es valida
+   210 0000026A C60425[22000000]4E          mov     byte[subMatrizValida], 'N'
+   211 00000272 668B0425[00000000]          mov     ax, [regFila]
+   212 0000027A 668B1C25[02000000]          mov     bx, [regColumna]
+   213 00000282 668B0C25[04000000]          mov     cx, [regDimension]
+   214 0000028A 66FFC9                      dec     cx  ; dimension - 1
+   215 0000028D 6601C8                      add     ax, cx ; realizo filasSubmatriz = fila + (dimension - 1)
+   216 00000290 6683F814                    cmp     ax, 20 ;
+   217 00000294 7F29                        jg      matrizInvalida
+   218 00000296 6629CB                      sub     bx, cx ; realizo columna = columna - (dimension - 1)
+   219 00000299 6683FB01                    cmp     bx, 1
+   220 0000029D 7C20                        jl      matrizInvalida
+   221                                  ; SUBMATRIZ VALIDA, cargo en fila y columna el primer elemento de la diagonal principal
+   222 0000029F 66891C25[16000000]          mov     [columna], bx ; asigno bx a columna, ya que en bx esta la columna del primer elemento de la diagonal principal de la submatriz
+   223 000002A7 668B0425[00000000]          mov     ax, [regFila]
+   224 000002AF 66890425[14000000]          mov     [fila], ax ; asigno regFil
+   225 000002B7 C60425[22000000]53          mov     byte[subMatrizValida], 'S'
+   226                                  matrizInvalida:
+   227 000002BF C3                          ret
+   228                                  
+   229                                  calcularDesplazamiento:
+   230                                  ; La posicion del elemento a sumar es un desplazamiento respecto del primer elemento de la matriz (vista como un vector)
+   231                                  ; y se calcula como Posicion (i,j) = (i-1)*CantidadDeFilas + (j-1)*LongitudElemento
+   232 000002C0 BB00000000                  mov     rbx,0x00 
+   233 000002C5 668B1C25[14000000]          mov     bx, word[fila] ; (i)
+   234 000002CD 66FFCB                      dec     bx ; (i-1)
+   235 000002D0 666BDB14                    imul    bx, bx, 20 ; (i-1)*CantidadDeFilas
+   236 000002D4 48891C25[18000000]          mov     [desplazamiento], rbx ; Guardo el parcial en desplazamiento
+   237 000002DC BB00000000                  mov     rbx,0x00
+   238 000002E1 668B1C25[16000000]          mov     bx, word[columna] ; (j)
+   239 000002E9 66FFCB                      dec     bx ; (j-1)
+   240 000002EC 48011C25[18000000]          add     [desplazamiento], rbx ; No hace falta hacer la multiplicacion de (j-1)*LongitudElemento porque LongitudElemento vale 1
+   241 000002F4 C3                          ret
+   242                                  calcularSumatoria:
+   243 000002F5 66C70425[23000000]-         mov     word[cantidadDeElementosSumados], 0
+   243 000002FD 0000               
+   244 000002FF C70425[25000000]00-         mov     dword[sumatoriaDiagonal], 0
+   244 00000307 000000             
+   245 0000030A 668B0C25[04000000]          mov     cx, word[regDimension]
+   246                                  inicioSumatoria:
+   247 00000312 66390C25[23000000]          cmp     word[cantidadDeElementosSumados], cx ; la cantidad de elementos de la diagonal es igual a la dimension
+   248 0000031A 7441                        je      finSumatoria 
+   249 0000031C E89FFFFFFF                  call    calcularDesplazamiento
+   250 00000321 49B9-                       mov     r9,matriz
+   250 00000323 [A600000000000000] 
+   251 0000032B 4C8B1425[18000000]          mov     r10,[desplazamiento]
+   252 00000333 4D01D1                      add     r9,r10 ; obtengo en R9 la posicion absoluta del elemento como matriz+desplazamiento
+   253 00000336 418A01                      mov     al, byte[r9] ; cargo en aL el byte apuntado por R9 para sumarlo
+   254 00000339 6698                        cbw     ; extendindo aL a 16 bits en ax para sumarlo con su signo en 16bits
+   255 0000033B 66010425[25000000]          add     [sumatoriaDiagonal], ax
+   256 00000343 66FF0425[14000000]          inc     word[fila]
+   257 0000034B 66FF0425[16000000]          inc     word[columna] ; le sumo uno a la fila y columna para pasar al siguiente miembro de la diagonal principal
+   258 00000353 66FF0425[23000000]          inc     word[cantidadDeElementosSumados]
+   259 0000035B EBB5                        jmp     inicioSumatoria
+   260                                  finSumatoria:
+   261 0000035D C3                          ret
+   262                                  
+   263                                  ; Se verifica si la sumatoria recien calculada es mayor a la ya registrada como mayor sumatoria
+   264                                  determinarMayorSumatoria:
+   265 0000035E 8B0425[25000000]            mov     eax, [sumatoriaDiagonal]
+   266 00000365 3B0425[36020000]            cmp     eax, [mayorSumatoria]
+   267 0000036C 7C07                        jl      sumatoriaDiagonalMenor
+   268 0000036E 890425[36020000]            mov     [mayorSumatoria], eax
+   269                                  sumatoriaDiagonalMenor:
+   270 00000375 C3                          ret
+   271                                  
+   272                                  ; Se muestra por pantalla la mayor sumatoria
+   273                                  mostrarMayorSumatoria:
+   274 00000376 48B9-                       mov     rcx, mensajeSumatoriaMaxima
+   274 00000378 [2500000000000000] 
+   275 00000380 488B1425[36020000]          mov     rdx, [mayorSumatoria]
+   276 00000388 4883EC08                    sub     rsp, 8
+   277 0000038C E8(00000000)                call    printf
+   278 00000391 4883C408                    add     rsp, 8
+   279 00000395 C3                          ret

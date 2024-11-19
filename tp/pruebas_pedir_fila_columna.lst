@@ -1,0 +1,76 @@
+     1                                  global main
+     2                                  extern gets
+     3                                  extern printf
+     4                                  extern sscanf
+     5                                  
+     6                                  section .data
+     7 00000000 496E67726573652075-         msjIngFila		db	'Ingrese un fila: ',0
+     7 00000009 6E2066696C613A2000 
+     8 00000012 496E67726573652075-         msjIngCol		db	'Ingrese un columna: ',0
+     8 0000001B 6E20636F6C756D6E61-
+     8 00000024 3A2000             
+     9 00000027 436173696C6C65726F-         msj2		db	'Casillero origen: %li,%li !!',10,0
+     9 00000030 206F726967656E3A20-
+     9 00000039 256C692C256C692021-
+     9 00000042 210A00             
+    10 00000045 256C6900                    format	db	'%li',0
+    11                                      
+    12                                  section .bss
+    13 00000000 <res 64h>                   filaStr resb 100
+    14 00000064 <res 64h>                   columnaStr resb 100
+    15                                  
+    16 000000C8 ????????????????            filaOrigen resq 1
+    17 000000D0 ????????????????            columnaOrigen resq 1
+    18                                      
+    19                                  section .text
+    20                                  main:
+    21 00000000 4883EC08                    sub rsp, 8            ; Align stack for calling conventions
+    22                                      
+    23                                  ;ingresar_fila
+    24 00000004 48BF-                       mov rdi, msjIngFila
+    24 00000006 [0000000000000000] 
+    25 0000000E 4831C0                      xor rax, rax           ; Limpia rax para printf
+    26 00000011 E8(00000000)                call printf
+    27                                      
+    28 00000016 48BF-                       mov rdi, filaStr
+    28 00000018 [0000000000000000] 
+    29 00000020 E8(00000000)                call gets    
+    30                                         
+    31                                      ;scanf
+    32 00000025 48BF-                       mov rdi, filaStr
+    32 00000027 [0000000000000000] 
+    33 0000002F 48BE-                       mov rsi, format
+    33 00000031 [4500000000000000] 
+    34 00000039 48BA-                       mov rdx, filaOrigen    
+    34 0000003B [C800000000000000] 
+    35 00000043 E8(00000000)                call sscanf
+    36                                      
+    37                                  ;ingresar_columna:
+    38 00000048 48BF-                       mov rdi, msjIngCol
+    38 0000004A [1200000000000000] 
+    39 00000052 4831C0                      xor rax, rax           ; Limpia rax para printf
+    40 00000055 E8(00000000)                call printf
+    41                                      
+    42 0000005A 48BF-                       mov rdi, columnaStr
+    42 0000005C [6400000000000000] 
+    43 00000064 E8(00000000)                call gets    
+    44                                         
+    45                                      ;scanf
+    46 00000069 48BF-                       mov rdi, columnaStr
+    46 0000006B [6400000000000000] 
+    47 00000073 48BE-                       mov rsi, format
+    47 00000075 [4500000000000000] 
+    48 0000007D 48BA-                       mov rdx, columnaOrigen    
+    48 0000007F [D000000000000000] 
+    49 00000087 E8(00000000)                call sscanf
+    50                                      
+    51                                  ;mostrar ingreso
+    52 0000008C 48BF-                       mov rdi, msj2
+    52 0000008E [2700000000000000] 
+    53 00000096 488B3425[C8000000]          mov rsi, [filaOrigen]
+    54 0000009E 488B1425[D0000000]          mov rdx, [columnaOrigen]
+    55 000000A6 E8(00000000)                call printf
+    56                                      
+    57 000000AB 4883C408                    add rsp, 8            ; Restore stack alignment
+    58 000000AF C3                          ret
+    59                                  

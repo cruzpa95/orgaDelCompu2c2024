@@ -1,0 +1,40 @@
+#!/bin/bash
+
+# Verificar si se ha proporcionado un argumento
+if [ $# -eq 0 ]; then
+    echo "Por favor, proporciona el nombre de archivo con extensión .asm."
+    exit 1
+fi
+
+# Asignar el nombre de archivo proporcionado
+filepath=$1
+
+# Verificar si el archivo tiene la extensión .asm
+if [[ ${filepath: -4} != ".asm" ]]; then
+    echo "El archivo debe tener extensión .asm"
+    exit 1
+fi
+
+# Extraer el nombre del archivo sin la extensión
+filename=${filepath%.asm}
+
+# Ensamblar con NASM
+nasm ${filename}.asm -f elf64 -g
+if [ $? -ne 0 ]; then
+    echo "Error durante el ensamblado."
+    exit 1
+fi
+
+# Compilar con GCC
+gcc ${filename}.o -o ${filename}.out -no-pie
+if [ $? -ne 0 ]; then
+    echo "Error durante la compilación."
+    exit 1
+fi
+
+# Ejecutar el archivo binario
+./${filename}.out
+if [ $? -ne 0 ]; then
+    echo "Error durante la ejecución del programa."
+    exit 1
+fi

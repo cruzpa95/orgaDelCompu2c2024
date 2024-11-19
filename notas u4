@@ -1,0 +1,145 @@
+Clase 25.09.2024
+UNIDAD Nro. 4: Lenguaje ensamblador (1/2)
+- Ensambladores . Dos pasadas
+
+
+###########################################################################################################################################################################
+Clase 01.10.2024
+Caso de estudio I: Arquitectura y lenguaje ensamblador x86 (1/4)
+
+
+"compilar" - al ejectuar nasm ...asm
+Transformar el codigo fuente en lenguaje de computadora ejecutable
+
+hay un codigo intermedio "objeto". se analiza para -desempe;o, busqueda de errores, comprension de la influencia del hardware
+Preprocesamiento - ".c a .i"
+Compilado - ".i a .s"
+ensamblado "s a .o"
+enlazado (linker) '.o a executable '
+
+
+
+
+Registros - 8, 16, 32, 64 bits
+AL,AH 8bits
+AX  - 16bits
+EAX - 32
+RAX - 64
+
+
+AX Acumulador: info asociada a instrucciones aritmetico logicas
+BX Base; direccion base de argumentos (array o arreglos), la dir base de ese arreglo esta en B
+RX Contador; contador o para realizar desplazamientos (posiciones en arreglos)
+DX Data; data.
+R8..R15
+
+Registros indice; cadenas de caracteres (para comparar 1 a 1)
+RSI; source - dir inicial de un registro
+RDI; dentination - dir inicial de otro registro
+
+Registros de Pila;
+BP Base Pointer; dir de memoria donde empieza el stack
+SP Stack Pointer; puntero al ultimo elemento
+
+Registros de instruccion (siguiente) y de control
+IP; instruccion pointer
+F Flags; donde estan los flags de errores(bits); OF-overflow, SF-sign flag, ZF-zeroFlag, etc
+
+Modos de direccionamiento
+    Implicito, registro, inmediato, directo,registro indirecto
+    registro relativo; indirecto + desplazamiento
+    base + indice; lo mismo pero usando RBX + RDI
+    relativo + indice; suma de 3, base + indice + desplazamiento
+
+Tipos de datos:
+    n entero: BPFc/s
+    decimal: ieee
+    caracteres: ascii
+
+Memoria:
+    Celda de memoria: 1byte
+    Palabra: 2byte
+    Double word: 4bytes
+    Quad word: 8bytes
+
+Endiannes:
+(IBM)   BigEndian; coincide con el orden logico del dato, "el dato final en la mayor direccion" (el mas grande al final)
+(intel) LittleEndian; el dato inicial para la logica en la mayor direccion. "en la dir mas alta el dato mas chico"
+
+INTEL little endian;
+
+    Caso1: formato caracter; -> se guarda como se lee 
+    msg db 'HOLA' -> [H , O, L, A] == [48, 4F, 4C, 41] 
+
+    Caso2: formato numerico -> se guarda al revez (lo guada al inverso)
+    num     dw 4666; es 123A -> [3A, 12]
+    num2    dd 12345678h (h de hexa) -> [78, 56, 34, 12] 
+
+    caso3: se ejecuta una copia de memoria a registro
+        La parte alta del registro contiene el byte de orden superior de memoria, 
+        y la parte baja del registro contiene el byte de orden inferior
+
+
+
+al ejecutar un programa con gbd
+    "b main" -> ejecuta breakpoints en etiquetas
+    "layout regs" -> muestra contenido de los registros
+    "s" o "run" -> avanza instrucciones post breakpoints.   
+
+
+Existe el programa SASM -> falta configurar -> configuradisimo
+###########################################################################################################################################################################
+Clase 07.10.2024
+Caso de estudio I: Arquitectura y lenguaje ensamblador x86 (2/4)
+al ejecutar un programa con gbd
+    "info address <variable>" -> "info address variableB" -> me da una dir de memoria 0x404034
+    "x" -> muestra el ocntenido en memoria
+    "x /8xb 0x404034", "8bytes (64bits), x hexa, b tamaño byte, <dir>" -> muestra el contenido 
+    "x /1xg 0x404034", si lo pido leer con el tamaño de la variable, me lo muestra en el formato correcto, como lo leemos en el registro.
+    "x /1xg &<variable>" tambien muestra el contenido de la variable
+
+Para usar la funcion "call", el stack tiene que estar alineado, tiene q ser multiplo de 16bytes antes de ejecutar, 
+    sino se produce un segfault
+
+###########################################################################################################################################################################
+9 de octubre de 2024
+Caso de estudio I: Arquitectura y lenguaje ensamblador x86 (3/4)
+
+Funciones de C
+puts    -> salida por pantalla
+printf  -> salida por pantalla
+system  -> cls/clear
+gets    -> ingreso por teclado
+sscanf  -> ingreso + conversion string a entero
+sprintf -> salida  + conversion entero a string
+fopen   -> abre archivo
+fgets   -> lectura texto de archivo 
+fread   -> lectura binario de archivo
+fputs   -> escritura texto de archivo 
+fwrite   -> escritura binario de archivo
+
+###########################################################################################################################################################################
+
+14 de octubre de 2024
+Caso de estudio I: Arquitectura y lenguaje ensamblador x86 (4/4)
+
+EJERCICIOS de matriz!!
+###########################################################################################################################################################################
+16 de octubre de 2024
+Caso de estudio I: Arquitectura y lenguaje ensamblador x86 (Ejemplos)
+
+#mas ejercicios (22min)
+###########################################################################################################################################################################
+
+
+22 de octubre de 2024
+Caso de estudio II: Arquitectura y lenguaje ensamblador ARM (1/3)
+
+#para ver tema nuevo.
+###########################################################################################################################################################################
+
+23 de octubre de 2024
+Clase II - Lenguaje ensamblador
+
+#para ver
+###########################################################################################################################################################################

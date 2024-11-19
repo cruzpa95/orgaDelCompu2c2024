@@ -1,0 +1,129 @@
+     1                                  global main
+     2                                  extern gets
+     3                                  extern printf
+     4                                  extern sscanf
+     5                                  
+     6                                  section .data
+     7 00000000 496E67726573652066-         msjIngFila		db	'Ingrese fila: ',0
+     7 00000009 696C613A2000       
+     8 0000000F 496E67726573652063-         msjIngCol		db	'Ingrese columna: ',0
+     8 00000018 6F6C756D6E613A2000 
+     9 00000021 436173696C6C65726F-         msj2		db	'Casillero origen: %li,%li !!',10,0
+     9 0000002A 206F726967656E3A20-
+     9 00000033 256C692C256C692021-
+     9 0000003C 210A00             
+    10 0000003F 436173696C6C65726F-         msj3    	db	'Casillero destino: %li,%li !!',10,0
+    10 00000048 2064657374696E6F3A-
+    10 00000051 20256C692C256C6920-
+    10 0000005A 21210A00           
+    11 0000005E 256C6900                    format	db	'%li',0
+    12                                      
+    13                                  section .bss
+    14 00000000 <res 64h>                   filaStr resb 100
+    15 00000064 <res 64h>                   columnaStr resb 100
+    16                                  
+    17 000000C8 ????????????????            filaOrigen resq 1
+    18 000000D0 ????????????????            columnaOrigen resq 1
+    19                                  
+    20 000000D8 ????????????????            filaDestino resq 1
+    21 000000E0 ????????????????            columnaDestino resq 1
+    22                                      
+    23                                  section .text
+    24                                  main:
+    25 00000000 4883EC08                    sub rsp, 8            ; Align stack for calling conventions
+    26                                      
+    27                                  ingresar_fila_origen:
+    28 00000004 48BF-                       mov rdi, msjIngFila
+    28 00000006 [0000000000000000] 
+    29 0000000E 4831C0                      xor rax, rax           ; Limpia rax para printf
+    30 00000011 E8(00000000)                call printf
+    31                                      
+    32 00000016 48BF-                       mov rdi, filaStr
+    32 00000018 [0000000000000000] 
+    33 00000020 E8(00000000)                call gets    
+    34                                  
+    35                                      ;scanf
+    36 00000025 48BF-                       mov rdi, filaStr
+    36 00000027 [0000000000000000] 
+    37 0000002F 48BE-                       mov rsi, format
+    37 00000031 [5E00000000000000] 
+    38 00000039 48BA-                       mov rdx, filaOrigen    
+    38 0000003B [C800000000000000] 
+    39 00000043 E8(00000000)                call sscanf
+    40                                      
+    41                                  ingresar_columna_origen:
+    42 00000048 48BF-                       mov rdi, msjIngCol
+    42 0000004A [0F00000000000000] 
+    43 00000052 4831C0                      xor rax, rax           ; Limpia rax para printf
+    44 00000055 E8(00000000)                call printf
+    45                                      
+    46 0000005A 48BF-                       mov rdi, columnaStr
+    46 0000005C [6400000000000000] 
+    47 00000064 E8(00000000)                call gets    
+    48                                         
+    49                                      ;scanf
+    50 00000069 48BF-                       mov rdi, columnaStr
+    50 0000006B [6400000000000000] 
+    51 00000073 48BE-                       mov rsi, format
+    51 00000075 [5E00000000000000] 
+    52 0000007D 48BA-                       mov rdx, columnaOrigen    
+    52 0000007F [D000000000000000] 
+    53 00000087 E8(00000000)                call sscanf
+    54                                  
+    55                                  
+    56                                      
+    57                                  ingresar_fila_destino:
+    58 0000008C 48BF-                       mov rdi, msjIngFila
+    58 0000008E [0000000000000000] 
+    59 00000096 4831C0                      xor rax, rax           ; Limpia rax para printf
+    60 00000099 E8(00000000)                call printf
+    61                                      
+    62 0000009E 48BF-                       mov rdi, filaStr
+    62 000000A0 [0000000000000000] 
+    63 000000A8 E8(00000000)                call gets    
+    64                                  
+    65                                      ;scanf
+    66 000000AD 48BF-                       mov rdi, filaStr
+    66 000000AF [0000000000000000] 
+    67 000000B7 48BE-                       mov rsi, format
+    67 000000B9 [5E00000000000000] 
+    68 000000C1 48BA-                       mov rdx, filaDestino    
+    68 000000C3 [D800000000000000] 
+    69 000000CB E8(00000000)                call sscanf
+    70                                      
+    71                                  ingresar_columna_destino:
+    72 000000D0 48BF-                       mov rdi, msjIngCol
+    72 000000D2 [0F00000000000000] 
+    73 000000DA 4831C0                      xor rax, rax           ; Limpia rax para printf
+    74 000000DD E8(00000000)                call printf
+    75                                      
+    76 000000E2 48BF-                       mov rdi, columnaStr
+    76 000000E4 [6400000000000000] 
+    77 000000EC E8(00000000)                call gets    
+    78                                         
+    79                                      ;scanf
+    80 000000F1 48BF-                       mov rdi, columnaStr
+    80 000000F3 [6400000000000000] 
+    81 000000FB 48BE-                       mov rsi, format
+    81 000000FD [5E00000000000000] 
+    82 00000105 48BA-                       mov rdx, columnaDestino    
+    82 00000107 [E000000000000000] 
+    83 0000010F E8(00000000)                call sscanf
+    84                                  
+    85                                  
+    86                                  ;mostrar ingreso
+    87 00000114 48BF-                       mov rdi, msj2
+    87 00000116 [2100000000000000] 
+    88 0000011E 488B3425[C8000000]          mov rsi, [filaOrigen]
+    89 00000126 488B1425[D0000000]          mov rdx, [columnaOrigen]
+    90 0000012E E8(00000000)                call printf
+    91                                      
+    92 00000133 48BF-                       mov rdi, msj3
+    92 00000135 [3F00000000000000] 
+    93 0000013D 488B3425[D8000000]          mov rsi, [filaDestino]
+    94 00000145 488B1425[E0000000]          mov rdx, [columnaDestino]
+    95 0000014D E8(00000000)                call printf
+    96                                      
+    97 00000152 4883C408                    add rsp, 8            ; Restore stack alignment
+    98 00000156 C3                          ret
+    99                                  

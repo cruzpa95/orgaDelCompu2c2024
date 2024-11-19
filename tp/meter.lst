@@ -1,0 +1,83 @@
+     1                                  global	main
+     2                                  extern 	printf
+     3                                  extern  gets
+     4                                  extern	sscanf
+     5                                  
+     6                                  section .data
+     7 00000000 2031323334353637            matriz db ' 1234567'
+     8 00000008 3120205858582020                   db '1  XXX  '
+     9 00000010 3220205858582020                   db '2  XXX  '
+    10 00000018 3358585858585858                   db '3XXXXXXX'
+    11 00000020 3458585858585858                   db '4XXXXXXX'
+    12 00000028 3558582020205858                   db '5XX   XX'
+    13 00000030 36202020204F2020                   db '6    O  '
+    14 00000038 3720204F20202020                   db '7  O    '
+    15 00000040 0A00                        saltoLinea  db 10, 0     ; Salto de línea al final de cada fila
+    16 00000042 59                          nuevoValor  db 'Y'       ; Salto de línea al final de cada fila
+    17 00000043 00                          posicion    db       0
+    18                                  ;    msjIngFila		db	'Ingrese un fila: ',0
+    19                                  ;    msjIngCol		db	'Ingrese un columna: ',0
+    20                                  ;    msjImpNum		db	'Usted ingreso %i !!',10,0
+    21 00000044 696E646963653A2025-         msjIndice		db	'indice: %li !!',10,0
+    21 0000004D 6C692021210A00     
+    22                                  
+    23                                  ;    numFormat		db	'%li',0	;%i 32 bits / %li 64 bits
+    24                                  
+    25                                      longitudElemento equ	1
+    26                                      cantidadColumnas equ  8
+    27                                      longitudFila equ	8
+    28 00000054 03                          posx db 3
+    29 00000055 03                          posy db 3
+    30                                  
+    31                                  
+    32                                  section .bss    
+    33 00000000 <res Ah>                    buffer		resb	10
+    34 0000000A ????????????????            numero		resq	1
+    35                                  
+    36                                  section .text
+    37                                  main:
+    38 00000000 4889E5                      mov rbp, rsp; for correct debugging
+    39 00000003 4883EC08                    sub rsp, 8                ; Reserva espacio en la pila
+    40 00000007 E805000000                  call mostrar_tablero
+    41                                  
+    42                                      fin:
+    43 0000000C 4883C408                    add rsp, 8             ; Restaura el espacio de la pila
+    44 00000010 C3                          ret
+    45                                  
+    46                                  mostrar_tablero:
+    47 00000011 B800000000                  mov rax, 0
+    48 00000016 48890425[43000000]          mov [posicion], rax 
+    49 0000001E B908000000                  mov rcx, cantidadColumnas
+    50                                      fila_loop:
+    51 00000023 51                              push rcx ;es necesario para loop, sino el registro rcx se pisa y loopea infinito
+    52                                          ; Carga la dirección de la fila actual en la matriz
+    53                                  
+    54                                          ; Imprime la fila actual
+    55                                  
+    56 00000024 48BF-                           mov rdi, matriz         ; Pasa la dirección de la fila a printf
+    56 00000026 [0000000000000000] 
+    57 0000002E 48033C25[43000000]              add rdi, [posicion]
+    58 00000036 4829C0                          sub rax, rax           ; Limpia rax para printf
+    59 00000039 E8(00000000)                    call printf
+    60                                  
+    61                                          ; Imprime salto de línea después de cada fila
+    62 0000003E 48BF-                           mov rdi, saltoLinea
+    62 00000040 [4000000000000000] 
+    63 00000048 4831C0                          xor rax, rax           ; Limpia rax para printf
+    64 0000004B E8(00000000)                    call printf
+    65 00000050 59                              pop rcx ;es necesario para loop, sino el registro rcx se pisa y loopea infinito
+    66                                          
+    67                                          ; Sumar 10 a "posicion"
+    68 00000051 488B0425[43000000]              mov rax, [posicion]        ; Carga el valor de "posicion" en rax
+    69 00000059 4883C008                        add rax, longitudFila                 ; Suma 10 a rax
+    70 0000005D 48890425[43000000]              mov [posicion], rax         ; Guarda el nuevo valor en "posicion"
+    71                                          
+    72 00000065 E2BC                            loop fila_loop
+    73                                          
+    74 00000067 48BF-                           mov rdi, saltoLinea
+    74 00000069 [4000000000000000] 
+    75 00000071 4831C0                          xor rax, rax           ; Limpia rax para printf
+    76 00000074 E8(00000000)                    call printf
+    77                                          
+    78 00000079 C3                              ret
+    79                                  

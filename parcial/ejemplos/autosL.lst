@@ -1,0 +1,304 @@
+     1                                  ; Dado un archivo en formato BINARIO que contiene informacion sobre autos llamado listado.dat
+     2                                  ; donde cada REGISTRO del archivo representa informacion de un auto con los campos: 
+     3                                  ;   marca:							10 caracteres
+     4                                  ;   año de fabricacion:				4 caracteres
+     5                                  ;   patente:						7 caracteres
+     6                                  ;	precio							4 bytes en bpf s/s
+     7                                  ; Se pide codificar un programa en assembler intel que lea cada registro del archivo listado y guarde
+     8                                  ; en un nuevo archivo en formato binario llamado seleccionados.dat las patentes y el precio (en bpfc/s) de aquellos autos
+     9                                  ; cuyo año de fabricación esté entre 2020 y 2022 (inclusive) y cuyo precio sea inferior a 5.000.000$
+    10                                  ; Como los datos del archivo pueden ser incorrectos, se deberan validar mediante una rutina interna.
+    11                                  ; Se deberá validar:
+    12                                  ;   Marca (que sea Fiat, Ford, Chevrolet o Peugeot)
+    13                                  ;   Año (que sea un valor numérico y que cumpla la condicion indicada del rango) 
+    14                                  ;   Precio que cumpla la condicion pedida.
+    15                                  global	main
+    16                                  extern  puts
+    17                                  extern  printf
+    18                                  extern  fopen
+    19                                  extern  fclose
+    20                                  extern  fread 
+    21                                  extern  sscanf
+    22                                  extern  fwrite
+    23                                  
+    24                                  section	.data
+    25 00000000 6C69737461646F2E64-     	fileList		db	"listado.dat",0
+    25 00000009 617400             
+    26 0000000C 726200                  	modeList		db	"rb",0		;read | binario | abrir o error
+    27 0000000F 0000000000000000        	handleList		dq	0
+    28                                  
+    29 00000017 73656C656363696F6E-     	fileSel			db	"seleccion.dat",0
+    29 00000020 2E64617400         
+    30 00000025 776200                  	modeSel			db	"wb",0	
+    31 00000028 0000000000000000        	handleSel		dq	0
+    32                                  
+    33                                  	regList			times	0 	db ''	;Longitud total del registro: 25
+    34 00000030 20<rep Ah>              	  brand			times	10	db ' '
+    35 0000003A 20<rep 4h>              	  year			times	4	db ' '
+    36 0000003E 20<rep 7h>              	  patente		times	7	db ' '
+    37 00000045 20<rep 4h>              	  price			times	4	db ' '
+    38                                  
+    39 00000049 466961742020202020-     	arrayBrands		db	"Fiat      Ford      Chevrolet Peugeot   "	
+    39 00000052 20466F726420202020-
+    39 0000005B 202043686576726F6C-
+    39 00000064 65742050657567656F-
+    39 0000006D 74202020           
+    40 00000071 2A2A2A2A00              	yearAux			db "****",0
+    41 00000076 25686900                	yearFormat	    db "%hi",0	;16 bits (word)
+    42 0000007A 0000                    	yearNum			dw	0		;16 bits (word)  
+    43                                  
+    44                                  	regSel			times	0	db	'' ;11 bytes en total
+    45 0000007C 20<rep 7h>              	 patenteSel		times	7	db ' ' ;7 bytes
+    46 00000083 00000000                	 priceSel					dd 0   ;4 bytes
+    47                                  
+    48                                  
+    49                                  	;*** Para debug
+    50 00000087 417065727475726120-     	msgOpenFileOk db "Apertura Listado ok",0
+    50 00000090 4C69737461646F206F-
+    50 00000099 6B00               
+    51 0000009B 6C6579656E646F2E2E-     	msgReading	db	"leyendo...",0
+    51 000000A4 2E00               
+    52 000000A6 5265672076616C6964-     	msgRegisterIsValid	db "Reg valido",0
+    52 000000AF 6F00               
+    53                                  
+    54                                  section .bss
+    55 00000000 ??                      	registerIsValid	resb 	1
+    56 00000001 ??                      	fieldIsValid	resb	1
+    57                                  section  .text
+    58                                  main:
+    59 00000000 4883EC08                	sub		rsp,8
+    60 00000004 E8D0000000              	call	openList
+    61 00000009 4883C408                	add		rsp,8
+    62 0000000D 4883F800                	cmp		rax,0
+    63 00000011 0F8E96000000            	jle		errorOpenList
+    64 00000017 48890425[0F000000]      	mov		[handleList],rax
+    65 0000001F 48BF-                   			mov 	rdi,msgOpenFileOk
+    65 00000021 [8700000000000000] 
+    66 00000029 E8BD020000              			call	printMsg
+    67                                  
+    68 0000002E 4883EC08                	sub		rsp,8
+    69 00000032 E8C4000000              	call	openSel
+    70 00000037 4883C408                	add		rsp,8
+    71 0000003B 4883F800                	cmp		rax,0
+    72 0000003F 7E6E                    	jle		errorOpenSel
+    73 00000041 48890425[28000000]      	mov		[handleSel],rax
+    74                                  	;------------------------
+    75                                  
+    76                                  readNextRegister:
+    77 00000049 4883EC08                	sub		rsp,8
+    78 0000004D E8F7000000              	call	readRegister
+    79 00000052 4883C408                	add		rsp,8
+    80 00000056 4883F800                	cmp		rax,0
+    81 0000005A 7E62                    	jle		closeFiles
+    82 0000005C 48BF-                   			mov 	rdi,msgReading
+    82 0000005E [9B00000000000000] 
+    83 00000066 E880020000              			call	printMsg	
+    84                                  
+    85 0000006B 4883EC08                	sub		rsp,8
+    86 0000006F E8FF000000              	call	validateRegister
+    87 00000074 4883C408                	add		rsp,8
+    88 00000078 803C25[00000000]4E      	cmp		byte[registerIsValid],'N'
+    89 00000080 74C7                    	je		readNextRegister
+    90 00000082 48BF-                   			mov 	rdi,msgRegisterIsValid
+    90 00000084 [A600000000000000] 
+    91 0000008C E85A020000              			call	printMsg	
+    92                                  
+    93 00000091 4883EC08                	sub		rsp,8
+    94 00000095 E8FD010000              	call	buildRegSel
+    95 0000009A 4883C408                	add		rsp,8
+    96 0000009E 4883EC08                	sub		rsp,8
+    97 000000A2 E81A020000              	call	writeRegSel
+    98 000000A7 4883C408                	add		rsp,8
+    99                                  
+   100 000000AB EB9C                    	jmp		readNextRegister
+   101                                  
+   102                                  errorOpenList:
+   103                                  ;lo que considere si fallo la apertura
+   104 000000AD EB29                    	jmp		endProg
+   105                                  errorOpenSel:
+   106 000000AF 4883EC08                	sub		rsp,8
+   107 000000B3 E865000000              	call	closeList
+   108 000000B8 4883C408                	add		rsp,8
+   109 000000BC EB1A                    	jmp		endProg	
+   110                                  closeFiles:
+   111 000000BE 4883EC08                	sub		rsp,8
+   112 000000C2 E856000000              	call	closeList
+   113 000000C7 4883C408                	add		rsp,8
+   114 000000CB 4883EC08                	sub		rsp,8
+   115 000000CF E85F000000              	call	closeSel
+   116 000000D4 4883C408                	add		rsp,8
+   117                                  endProg:
+   118 000000D8 C3                      ret
+   119                                  ;------------------------------------------------------
+   120                                  ;------------------------------------------------------
+   121                                  ;   RUTINAS INTERNAS
+   122                                  ;------------------------------------------------------
+   123                                  openList:	;Abro archivo listado
+   124 000000D9 48BF-                       mov		rdi,fileList
+   124 000000DB [0000000000000000] 
+   125 000000E3 48BE-                       mov     rsi,modeList
+   125 000000E5 [0C00000000000000] 
+   126 000000ED 4883EC08                	sub		rsp,8
+   127 000000F1 E8(00000000)            	call	fopen
+   128 000000F6 4883C408                	add		rsp,8
+   129 000000FA C3                      ret
+   130                                  openSel:	;Abro archivo seleccion
+   131 000000FB 48BF-                   	mov		rdi,fileSel
+   131 000000FD [1700000000000000] 
+   132 00000105 48BE-                   	mov		rsi,modeSel
+   132 00000107 [2500000000000000] 
+   133 0000010F 4883EC08                	sub		rsp,8
+   134 00000113 E8(00000000)            	call	fopen
+   135 00000118 4883C408                	add		rsp,8
+   136 0000011C C3                      ret
+   137                                  closeList:	;Cierro archivo listado
+   138 0000011D 488B3C25[0F000000]          mov     rdi,[handleList]
+   139 00000125 4883EC08                	sub		rsp,8
+   140 00000129 E8(00000000)                call    fclose
+   141 0000012E 4883C408                	add		rsp,8
+   142 00000132 C3                      ret
+   143                                  closeSel:	;Cierro archivo seleccion
+   144 00000133 488B3C25[28000000]      	mov		rdi,[handleSel]
+   145 0000013B 4883EC08                	sub		rsp,8
+   146 0000013F E8(00000000)            	call	fclose
+   147 00000144 4883C408                	add		rsp,8
+   148 00000148 C3                      ret
+   149                                  ;-------------------------------------
+   150                                  readRegister:
+   151 00000149 48BF-                       mov     rdi,regList
+   151 0000014B [3000000000000000] 
+   152 00000153 BE19000000                  mov     rsi,25           
+   153 00000158 BA01000000                  mov     rdx,1
+   154 0000015D 488B0C25[0F000000]      	mov		rcx,[handleList] 
+   155 00000165 4883EC08                	sub		rsp,8  
+   156 00000169 E8(00000000)            	call    fread
+   157 0000016E 4883C408                	add		rsp,8
+   158 00000172 C3                      ret
+   159                                  ;------------------------------------------------------
+   160                                  ;VALIDAR REG
+   161                                  validateRegister:
+   162 00000173 C60425[00000000]4E      	mov     byte[registerIsValid],'N'
+   163                                  
+   164 0000017B 4883EC08                	sub		rsp,8
+   165 0000017F E845000000              	call	validateBrand
+   166 00000184 4883C408                	add		rsp,8
+   167 00000188 803C25[01000000]4E      	cmp		byte[fieldIsValid],'N'
+   168 00000190 7436                    	je		endValidateRegister
+   169                                  
+   170 00000192 4883EC08                	sub		rsp,8
+   171 00000196 E869000000              	call	validateYear
+   172 0000019B 4883C408                	add		rsp,8
+   173 0000019F 803C25[01000000]4E      	cmp		byte[fieldIsValid],'N'
+   174 000001A7 741F                    	je		endValidateRegister	
+   175                                  
+   176 000001A9 4883EC08                	sub		rsp,8
+   177 000001AD E8C7000000              	call	validatePrice
+   178 000001B2 4883C408                	add		rsp,8
+   179 000001B6 803C25[01000000]4E      	cmp		byte[fieldIsValid],'N'
+   180 000001BE 7408                    	je		endValidateRegister	
+   181                                  
+   182 000001C0 C60425[00000000]53      	mov     byte[registerIsValid],'S'
+   183                                  endValidateRegister:
+   184 000001C8 C3                      ret
+   185                                  ;------------------------------------------------------
+   186                                  ;VALIDAR MARCA
+   187                                  validateBrand:
+   188 000001C9 C60425[01000000]53      	mov     byte[fieldIsValid],'S'
+   189                                  
+   190 000001D1 BB00000000              	mov		rbx,0
+   191 000001D6 B904000000              	mov		rcx,4
+   192                                  nextBrand:
+   193 000001DB 51                      	push	rcx
+   194 000001DC B90A000000              	mov		rcx,10
+   195 000001E1 488D3425[30000000]      	lea		rsi,[brand] ; mov   rsi,brand
+   196 000001E9 488DBB[49000000]        	lea		rdi,[arrayBrands + rbx]
+   197 000001F0 F3A6                    	repe cmpsb
+   198 000001F2 59                      	pop		rcx
+   199                                  
+   200 000001F3 740E                    	je		brandOk
+   201 000001F5 4883C30A                	add		rbx,10
+   202 000001F9 E2E0                    	loop	nextBrand
+   203                                  
+   204 000001FB C60425[01000000]4E      	mov     byte[fieldIsValid],'N'
+   205                                  brandOk:	
+   206 00000203 C3                      ret
+   207                                  ;------------------------------------------------------
+   208                                  ;VALIDAR AÑO
+   209                                  validateYear:
+   210                                  ;Copia a un campo finalizado con 0 binario (para poder ser usado por sscanf)
+   211 00000204 C60425[01000000]4E      	mov     byte[fieldIsValid],'N'
+   212 0000020C B904000000              	mov		rcx,4
+   213 00000211 48BE-                   	mov		rsi,year
+   213 00000213 [3A00000000000000] 
+   214 0000021B 48BF-                   	mov		rdi,yearAux
+   214 0000021D [7100000000000000] 
+   215 00000225 F3A4                    	rep	movsb
+   216                                  ;Conversion para validacion fisica
+   217 00000227 48BF-                   	mov		rdi,yearAux    
+   217 00000229 [7100000000000000] 
+   218 00000231 48BE-                   	mov		rsi,yearFormat   
+   218 00000233 [7600000000000000] 
+   219 0000023B 48BA-                   	mov		rdx,yearNum  
+   219 0000023D [7A00000000000000] 
+   220 00000245 4883EC08                	sub		rsp,8
+   221 00000249 E8(00000000)            	call	sscanf
+   222 0000024E 4883C408                	add		rsp,8
+   223 00000252 4883F801                	cmp		rax,1
+   224 00000256 7C20                    	jl		yearError
+   225                                  
+   226                                  ; Verifico si el año esta comprendido en el rango 2020 - 2022
+   227 00000258 66813C25[7A000000]-     	cmp		word[yearNum],2020
+   227 00000260 E407               
+   228 00000262 7C14                    	jl		yearError
+   229 00000264 66813C25[7A000000]-     	cmp		word[yearNum],2022
+   229 0000026C E607               
+   230 0000026E 7F08                    	jg		yearError 	
+   231                                  
+   232 00000270 C60425[01000000]53      	mov     byte[fieldIsValid],'S'
+   233                                  yearError:
+   234 00000278 C3                      ret
+   235                                  ;------------------------------------------------------
+   236                                  ;VALIDAR PRECIO
+   237                                  validatePrice:
+   238 00000279 C60425[01000000]53      	mov     byte[fieldIsValid],'S'
+   239 00000281 813C25[45000000]40-     	cmp		dword[price],5000000
+   239 00000289 4B4C00             
+   240 0000028C 7E08                    	jle		precioOk
+   241 0000028E C60425[01000000]4E      	mov     byte[fieldIsValid],'N'
+   242                                  precioOk:
+   243 00000296 C3                      ret
+   244                                  ;------------------------------------------------------
+   245                                  
+   246                                  buildRegSel:
+   247                                  	;Copiar los datos requeridos al archivo de seleccion
+   248                                  	;Copio Patente
+   249 00000297 B907000000              	mov		rcx,7
+   250 0000029C 48BE-                   	mov		rsi,patente
+   250 0000029E [3E00000000000000] 
+   251 000002A6 48BF-                   	mov		rdi,patenteSel
+   251 000002A8 [7C00000000000000] 
+   252 000002B0 F3A4                    	rep	movsb	
+   253                                  	;Copio precio
+   254 000002B2 8B0425[45000000]        	mov		eax,[price]
+   255 000002B9 890425[83000000]        	mov		[priceSel],eax	
+   256 000002C0 C3                      ret
+   257                                  
+   258                                  ;------------------------------------------------------
+   259                                  writeRegSel:
+   260                                  	;Guardo registro en archivo Seleccion
+   261 000002C1 48BF-                   	mov		rdi,regSel			;Parametro 1: dir area de memoria con los datos a copiar
+   261 000002C3 [7C00000000000000] 
+   262 000002CB BE0B000000              	mov		rsi,11						;Parametro 2: longitud del registro
+   263 000002D0 BA01000000              	mov		rdx,1						;Parametro 3: cantidad de registros
+   264 000002D5 488B0C25[28000000]      	mov		rcx,[handleSel]		;Parametro 4: handle del archivo
+   265 000002DD 4883EC08                	sub		rsp,8
+   266 000002E1 E8(00000000)            	call	fwrite
+   267 000002E6 4883C408                	add		rsp,8
+   268 000002EA C3                      ret
+   269                                  
+   270                                  ;------------------------
+   271                                  printMsg:
+   272 000002EB 4883EC08                	sub		rsp,8
+   273 000002EF E8(00000000)            	call	puts  
+   274 000002F4 4883C408                	add		rsp,8
+   275 000002F8 C3                      ret

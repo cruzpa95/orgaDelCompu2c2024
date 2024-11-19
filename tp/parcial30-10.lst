@@ -1,0 +1,55 @@
+     1                                  global	main
+     2                                  extern 	printf
+     3                                  extern  gets
+     4                                  extern	sscanf
+     5                                  extern	puts
+     6                                  
+     7                                  section .data
+     8                                  
+     9 00000000 34                          f db '4'
+    10 00000001 4142                        tex db "AB"
+    11 00000003 4344                        c   db "CD"
+    12 00000005 00                          cont db 0
+    13                                  
+    14 00000006 0100<rep 64h>               tabla times 100 db 1, 0
+    15                                  
+    16                                  
+    17                                  section .bss    
+    18 00000000 <res Ah>                    buffer		resb	10
+    19 0000000A ????????????????            numero		resq	1
+    20                                  
+    21                                  section .text
+    22                                  main:
+    23 00000000 4889E5                      mov rbp, rsp; for correct debugging
+    24                                      
+    25 00000003 B800000000                  mov rax, 0
+    26 00000008 B900000000                  mov rcx, 0
+    27 0000000D 8A0C25[00000000]            mov cl, [f]
+    28 00000014 BE00000000                  mov esi,0
+    29 00000019 C3                          ret
+    30                                  foo:
+    31 0000001A 66670386[06000000]          add ax, [tabla+esi]
+    32 00000022 6683C628                    add si, 40
+    33 00000026 E2F2                        loop foo
+    34                                  
+    35 00000028 88C2                        mov dl,al
+    36 0000002A 486BC002                    imul rax,2
+    37 0000002E 88C6                        mov dh, al
+    38                                  
+    39 00000030 66891425[01000000]          mov [tex],dx
+    40                                      
+    41 00000038 B901000000                  mov rcx,1
+    42 0000003D 48BE-                       mov rsi, cont
+    42 0000003F [0500000000000000] 
+    43 00000047 48BF-                       mov rdi, c
+    43 00000049 [0300000000000000] 
+    44 00000051 48FFC7                      inc rdi
+    45 00000054 F3A4                        rep movsb
+    46                                      
+    47 00000056 48BF-                       mov rdi, tex
+    47 00000058 [0100000000000000] 
+    48 00000060 4883EC08                    sub rsp, 8                ; Reserva espacio en la pila
+    49 00000064 E8(00000000)                call puts
+    50 00000069 4883C408                    add rsp, 8
+    51                                  
+    52 0000006D C3                          ret
