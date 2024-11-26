@@ -32,7 +32,6 @@ section .data
     soldados    db 'soldados',0
     jugadorActual db 'soldados',0
     casilleroInvalido db 'casillero invalido!',10,0
-    msj_movimiento_oficial_invalido db 'movimiento_oficial_invalido! Vuelva a intentarlo',10,0
 
     endGame    db 'Fin del juego!',10,0
     turno db 1
@@ -40,9 +39,9 @@ section .data
     
     matriz  db ' 1234567',0
             db '1X XXX  ',0
-            db '2  X X  ',0
-            db '3X    XX',0
-            db '4X  O  X',0
+            db '2  XXX  ',0
+            db '3XXXXXXX',0
+            db '4XXXXXXX',0
             db '5XX   XX',0
             db '6    O  ',0
             db '7  O    ',0
@@ -54,7 +53,7 @@ section .bss
 
 section .text
 main:
-     mov rbp, rsp; for correct debugging   
+    mov rbp, rsp; for correct debugging   
     sub rsp, 8
     call asignar_jugador_inicial
 ciclo_juego:
@@ -65,20 +64,12 @@ pedir_movimiento:
     call pedir_casillero_origen
     call pedir_casillero_destino
 
-
-
-    mov al, [turno]
-    cmp al, 1
-    je call_validar_movimiento_soldado
-call_validar_movimiento_oficial:    
-    call validar_movimiento_oficial ;hacer esto solo si es el turno del oficial.
+    mov r12, 0
+    call validar_movimiento
     cmp r12, 0                  ; Si la validacion esta mal -> r12 != 0 -> volver a pedir origen-destin0
     jne pedir_movimiento         ; Si no es 0 -> back to pedir_movimiento
-    jmp prox_turno
-call_validar_movimiento_soldado:
-    jmp prox_turno
     
-prox_turno:
+
     call actualizar_turno
     call actualizar_tablero
     jmp ciclo_juego      ; Repite el bucle
@@ -285,13 +276,11 @@ actualizar_turno:
     jmp es_impar      ; Si no, turno es impar
 
 es_par:          
-    mov byte[turno], 0
     lea rax, [oficiales]          ; Cargar la dirección de 'soldados' en AX
     mov [jugadorActual], rax
     ret
 
 es_impar:        
-    mov byte[turno], 1
     lea rax, [soldados]          ; Cargar la dirección de 'soldados' en AX
     mov [jugadorActual], rax
     ret
@@ -470,56 +459,8 @@ destino_invalido:
     jmp pedir_casillero_destino
     destino_ok:
     ret    
-validar_movimiento_oficial:
-;;falta resolver esto -> solo de a 1 en cualqeuir dir.
-    mov r12,0
-    mov rax,0
-
-    mov al, [posx_ini]
-    mov ah, [posx_fin]
-    sub al,ah
-    cmp al, 0
-    je validar_movimiento_oficial_y_horizontal
-    cmp al, 1
-    je validar_movimiento_oficial_y_arriba_abajo
-    cmp al,-1
-    je validar_movimiento_oficial_y_arriba_abajo
-    jmp movimiento_oficial_invalido
-    
-validar_movimiento_oficial_y_horizontal:
-    mov rax,0
-    mov al, [posy_ini]
-    mov ah, [posy_fin]
-    sub al,ah
-    cmp al, 1
-    je movimiento_oficial_ok
-    cmp al,-1
-    je movimiento_oficial_ok
-    jmp movimiento_oficial_invalido
-validar_movimiento_oficial_y_arriba_abajo:
-    mov rax,0
-    mov al, [posy_ini]
-    mov ah, [posy_fin]
-    sub al,ah
-    cmp al, 1
-    je movimiento_oficial_ok
-    cmp al, 0
-    je movimiento_oficial_ok
-    cmp al,-1
-    je movimiento_oficial_ok
-    jmp movimiento_oficial_invalido
-    
-    
-movimiento_oficial_ok:
-    mov r12,0
-    ret
-movimiento_oficial_invalido:
-    mov rdi,msj_movimiento_oficial_invalido
-    sub rsp, 8
-    call printf
-    add rsp,8
-    
-    mov r12,1
+validar_movimiento:
+    ;;falta validar X e Y dentro del tablero
     ret
 
     

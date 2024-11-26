@@ -1,16 +1,24 @@
-validar si casillero origen es valido 
-    -si es el turno de los soldadoss el casillero inicial debe ser una X.
-    -si es el turno de los oficiales el casillero inicial debe ser una O.
-
-Listo.
-
-
-validar si casillero destino es valido 
-    -el casillero destino debe ser un " ".
-Listo.
+[DONE]  validar si casillero origen es valido 
+            -si es el turno de los soldadoss el casillero inicial debe ser una X.
+            -si es el turno de los oficiales el casillero inicial debe ser una O.
 
 
 
 
-casillero: 11
-r10: 0x20205858582020
+[DONE]   validar si casillero destino es valido 
+            -el casillero destino debe ser un " ".
+
+[DONE]  validar origen y destino dentro del tablero.
+
+[?]     validar comer..
+
+
+
+Mejoras:
+    indicar mensajes de error segun su motivo.
+
+
+tp_10: tiene hasta movimiento oficial simple OK
+    le falta, validar movimiento de comer
+    falta validar movimiento soldado.
+

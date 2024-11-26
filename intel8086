@@ -1,1 +1,26 @@
 intel8086
+
+
+Funciones de C
+puts    -> salida por pantalla
+printf  -> salida por pantalla
+system  -> cls/clear
+gets    -> ingreso por teclado
+sscanf  -> ingreso + conversion string a entero
+sprintf -> salida  + conversion entero a string
+fopen   -> abre archivo
+fgets   -> lectura texto de archivo 
+fread   -> lectura binario de archivo
+fputs   -> escritura texto de archivo 
+fwrite   -> escritura binario de archivo
+
+
+
+
+###### Datos.
+#Salto de linea:
+mensaje1 db 'Imprimo con printf--', 10, 0   ; 10 representa un salto de línea (0Ah en ASCII)
+
+
+#parametros de funciones:
+Linux: rax rdi rsi rdx rcx r8 r9 stack...
