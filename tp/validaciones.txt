@@ -1,0 +1,16 @@
+validar si casillero origen es valido 
+    -si es el turno de los soldadoss el casillero inicial debe ser una X.
+    -si es el turno de los oficiales el casillero inicial debe ser una O.
+
+Listo.
+
+
+validar si casillero destino es valido 
+    -el casillero destino debe ser un " ".
+Listo.
+
+
+
+
+casillero: 11
+r10: 0x20205858582020

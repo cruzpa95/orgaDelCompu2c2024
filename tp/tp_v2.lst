@@ -1,0 +1,241 @@
+     1                                  global	main
+     2                                  extern 	printf
+     3                                  extern  gets
+     4                                  extern	sscanf
+     5                                  extern  system
+     6                                  
+     7                                  section .data
+     8 00000000 496E67726573652075-         msjIngFilaColumna	db	'Ingrese un fila y columna [XY]: ',0
+     8 00000009 6E2066696C61207920-
+     8 00000012 636F6C756D6E61205B-
+     8 0000001B 58595D3A2000       
+     9 00000021 4573207475726E6F20-         esTurnoDe	db	'Es turno de los %s!',10,0
+     9 0000002A 6465206C6F73202573-
+     9 00000033 210A00             
+    10 00000036 6F66696369616C6573-         oficiales   db 'oficiales',0
+    10 0000003F 00                 
+    11 00000040 736F6C6461646F7300          soldados    db 'soldados',0
+    12 00000049 0A00                        saltoLinea  db 10, 0     ; Salto de línea al final de cada fila     
+    13 0000004B 00                          posicion    db       0
+    14 0000004C 256C6900                    format	db	'%li', 0
+    15                                  
+    16                                      longitudElemento equ	1
+    17                                      cantidadColumnas equ 8
+    18                                      cantidadFilas    equ	9
+    19                                      
+    20 00000050 01                          posx_ini db 1
+    21 00000051 01                          posy_ini db 1
+    22                                      
+    23 00000052 01                          posx_fin db 1
+    24 00000053 01                          posy_fin db 1
+    25                                      
+    26 00000054 01                          elemento_inicial db 1
+    27                                  
+    28 00000055 256C6920256C6900            format2	db	'%li %li', 0
+    29 0000005D 636C65617200                cmd_clear db "clear",0
+    30                                      
+    31 00000063 203132333435363700          matriz db ' 1234567',0
+    32 0000006C 312020585858202000             db '1  XXX  ',0
+    33 00000075 322020585858202000             db '2  XXX  ',0
+    34 0000007E 335858585858585800             db '3XXXXXXX',0
+    35 00000087 345858585858585800             db '4XXXXXXX',0
+    36 00000090 355858202020585800             db '5XX   XX',0
+    37 00000099 36202020204F202000             db '6    O  ',0
+    38 000000A2 3720204F2020202000             db '7  O    ',0
+    39                                  
+    40                                  section .bss    
+    41 00000000 <res Ah>                    buffer		resb	10
+    42 0000000A ????                        cadena resb 2
+    43 0000000C ??                          numero  resb 1
+    44 0000000D <res Ah>                    turnoActual resb 10
+    45                                  
+    46                                  section .text
+    47                                  main:
+    48 00000000 4889E5                      mov rbp, rsp; for correct debugging
+    49 00000003 4883EC08                    sub rsp, 8                ; Reserva espacio en la pila
+    50 00000007 E823000000                  call mostrar_tablero
+    51 0000000C E8D4010000                  call mostrar_jugador_actual
+    52 00000011 E829010000                  call pedir_casillero_origen
+    53 00000016 E87B010000                  call pedir_casillero_destino
+    54                                  
+    55 0000001B E878000000                  call actualizar_tablero
+    56                                  
+    57 00000020 E802010000                  call clear_screen
+    58 00000025 E805000000                  call mostrar_tablero
+    59                                      fin:
+    60 0000002A 4883C408                    add rsp, 8             ; Restaura el espacio de la pila
+    61 0000002E C3                          ret
+    62                                  
+    63                                  mostrar_tablero:
+    64 0000002F B800000000                  mov rax, 0
+    65 00000034 48890425[4B000000]          mov [posicion], rax 
+    66 0000003C B908000000                  mov rcx, cantidadColumnas
+    67                                      fila_loop:
+    68 00000041 51                              push rcx ;es necesario para loop, sino el registro rcx se pisa y loopea infinito
+    69                                          ; Carga la dirección de la fila actual en la matriz
+    70                                  
+    71                                          ; Imprime la fila actual
+    72                                  
+    73 00000042 48BF-                           mov rdi, matriz         ; Pasa la dirección de la fila a printf
+    73 00000044 [6300000000000000] 
+    74 0000004C 48033C25[4B000000]              add rdi, [posicion]
+    75 00000054 4829C0                          sub rax, rax           ; Limpia rax para printf
+    76 00000057 E8(00000000)                    call printf
+    77                                  
+    78                                          ; Imprime salto de línea después de cada fila
+    79 0000005C 48BF-                           mov rdi, saltoLinea
+    79 0000005E [4900000000000000] 
+    80 00000066 4831C0                          xor rax, rax           ; Limpia rax para printf
+    81 00000069 E8(00000000)                    call printf
+    82 0000006E 59                              pop rcx ;es necesario para loop, sino el registro rcx se pisa y loopea infinito
+    83                                          
+    84                                          ; Sumar 10 a "posicion"
+    85 0000006F 488B0425[4B000000]              mov rax, [posicion]         ; Carga el valor de "posicion" en rax
+    86 00000077 4883C009                        add rax, cantidadFilas                 ; Suma 10 a rax
+    87 0000007B 48890425[4B000000]              mov [posicion], rax         ; Guarda el nuevo valor en "posicion"
+    88                                          
+    89 00000083 E2BC                            loop fila_loop
+    90                                          
+    91 00000085 48BF-                           mov rdi, saltoLinea
+    91 00000087 [4900000000000000] 
+    92 0000008F 4831C0                          xor rax, rax           ; Limpia rax para printf
+    93 00000092 E8(00000000)                    call printf
+    94                                          
+    95 00000097 C3                              ret
+    96                                  
+    97                                  actualizar_tablero:
+    98                                      ;Posicionamiento en el elemento i,j de una matriz
+    99                                      ;(i-1)*longitudFila + (j-1)*longitudElemento
+   100                                      ;longitdFila= longitudElemento*cantidadColumnas
+   101 00000098 4829C9                      sub rcx, rcx
+   102 0000009B 8A0425[50000000]            mov al,[posx_ini] ;guardo el valor de la fila, en AL(8bits) 
+   103                                                      ;ya que posx es db (byte= 8bits) sino guarda cualquier cosa
+   104                                  ;    sub rax,1 -> no es necesaria la resta ya que la matriz empieza en 1,1
+   105 000000A2 41B809000000                mov r8, cantidadFilas
+   106 000000A8 49F7E8                      imul r8   ;me desplazo en la fila
+   107 000000AB 4801C1                      add rcx,rax
+   108                                      
+   109 000000AE 8A0425[51000000]            mov al,[posy_ini] ;guardo el valor de la col,
+   110                                  ;    sub rax,1
+   111 000000B5 41B801000000                mov r8, longitudElemento ;guardo en r8 para darle longitud y poder multiplicar usando imul
+   112 000000BB 49F7E8                      imul r8 ;me desplazo en la columna
+   113 000000BE 4801C1                      add rcx,rax ;sumo los desplazamientos
+   114                                      
+   115                                      
+   116 000000C1 48BB-                       mov rbx,matriz ;pongo el pto al inicio de la matriz
+   116 000000C3 [6300000000000000] 
+   117 000000CB 4801CB                      add rbx,rcx ;me posicione en la matriz
+   118                                  
+   119 000000CE 4C8B13                      mov r10, [rbx] ;guardo un elemento
+   120 000000D1 4C8B4B01                    mov r9, [rbx+1] ;guardo en r9 lo que le sigue de matriz posterior al elemento a actualizar
+   121 000000D5 41B820000000                mov r8, " " ; lo muevo a un reg para darle (y estar seguro de su) longitud
+   122 000000DB 4C8903                      mov [rbx],r8 ;muevo el valor(de igual longitud). muevo a la posicion de la matriz a actualizar
+   123                                      
+   124                                      ;despues de agregar el nuevo valor, agregarle el resto de la matriz que estaba antes.
+   125 000000DE 4C894B01                    mov [rbx+1],r9
+   126                                      
+   127                                      
+   128                                      ;;repito con casillero_destino
+   129                                      ;;y guardo en el destino lo que guarde en r10 (el elemento origen)
+   130                                      
+   131                                      
+   132                                      ;Posicionamiento en el elemento i,j de una matriz
+   133                                      ;(i-1)*longitudFila + (j-1)*longitudElemento
+   134                                      ;longitdFila= longitudElemento*cantidadColumnas
+   135 000000E2 4829C9                      sub rcx, rcx
+   136 000000E5 8A0425[52000000]            mov al,[posx_fin] ;guardo el valor de la fila, en AL(8bits) 
+   137                                                      ;ya que posx es db (byte= 8bits) sino guarda cualquier cosa
+   138                                  ;    sub rax,1 -> no es necesaria la resta ya que la matriz empieza en 1,1
+   139 000000EC 41B809000000                mov r8, cantidadFilas
+   140 000000F2 49F7E8                      imul r8   ;me desplazo en la fila
+   141 000000F5 4801C1                      add rcx,rax
+   142                                      
+   143 000000F8 8A0425[53000000]            mov al,[posy_fin] ;guardo el valor de la col,
+   144                                  ;    sub rax,1
+   145 000000FF 41B801000000                mov r8, longitudElemento ;guardo en r8 para darle longitud y poder multiplicar usando imul
+   146 00000105 49F7E8                      imul r8 ;me desplazo en la columna
+   147 00000108 4801C1                      add rcx,rax ;sumo los desplazamientos
+   148                                      
+   149                                      
+   150 0000010B 48BB-                       mov rbx,matriz ;pongo el pto al inicio de la matriz
+   150 0000010D [6300000000000000] 
+   151 00000115 4801CB                      add rbx,rcx ;me posicione en la matriz
+   152                                  
+   153 00000118 4C8B4B01                    mov r9, [rbx+1] ;guardo en r9 lo que le sigue de matriz posterior al elemento a actualizar
+   154 0000011C 4D89D0                      mov r8, r10 ; lo muevo a un reg para darle (y estar seguro de su) longitud
+   155 0000011F 4C8903                      mov [rbx],r8 ;muevo el valor(de igual longitud). muevo a la posicion de la matriz a actualizar
+   156                                      
+   157                                      ;despues de agregar el nuevo valor, agregarle el resto de la matriz que estaba antes.
+   158 00000122 4C894B01                    mov [rbx+1],r9
+   159                                  
+   160 00000126 C3                          ret
+   161                                  
+   162                                  clear_screen:
+   163 00000127 48BF-                       mov rdi, cmd_clear
+   163 00000129 [5D00000000000000] 
+   164 00000131 4883EC08                    sub rsp, 8
+   165 00000135 E8(00000000)                call system
+   166 0000013A 4883C408                    add rsp, 8
+   167 0000013E C3                          ret
+   168                                      
+   169                                  pedir_casillero_origen:
+   170                                      
+   171 0000013F 4883EC08                    sub rsp, 8
+   172 00000143 48BF-                       mov rdi, msjIngFilaColumna
+   172 00000145 [0000000000000000] 
+   173 0000014D E8(00000000)                call printf
+   174 00000152 4883C408                    add rsp, 8
+   175                                  
+   176 00000156 48BF-                       mov rdi, cadena      ; Dirección de 'cadena'
+   176 00000158 [0A00000000000000] 
+   177 00000160 4883EC08                    sub rsp, 8
+   178 00000164 E8(00000000)                call gets
+   179 00000169 4883C408                    add rsp, 8
+   180                                  
+   181                                      ; Extraer el primer carácter (primer número)
+   182 0000016D 480FB60425-                 movzx rax, byte [cadena]     ; Cargar el primer carácter de 'cadena' en rax
+   182 00000172 [0A000000]         
+   183 00000176 4883E830                    sub rax, '0'                 ; Convertir de ASCII a valor numérico
+   184 0000017A 880425[50000000]            mov [posx_ini], al            ; Guardar el valor en 'posx_ini'
+   185                                      
+   186                                      ; Extraer el segundo carácter (segundo número)
+   187 00000181 480FB60425-                 movzx rax, byte [cadena + 1] ; Cargar el segundo carácter de 'cadena' en rax
+   187 00000186 [0B000000]         
+   188 0000018A 4883E830                    sub rax, '0'                 ; Convertir de ASCII a valor numérico
+   189 0000018E 880425[51000000]            mov [posy_ini], al            ; Guardar el valor en 'posy_ini'
+   190                                     
+   191 00000195 C3                          ret
+   192                                      
+   193                                  pedir_casillero_destino:
+   194 00000196 4883EC08                    sub rsp, 8
+   195 0000019A 48BF-                       mov rdi, msjIngFilaColumna
+   195 0000019C [0000000000000000] 
+   196 000001A4 E8(00000000)                call printf
+   197                                  
+   198 000001A9 48BF-                       mov rdi, cadena      ; Dirección de 'cadena'
+   198 000001AB [0A00000000000000] 
+   199 000001B3 E8(00000000)                call gets
+   200                                  
+   201                                      ; Extraer el primer carácter (primer número)
+   202 000001B8 480FB60425-                 movzx rax, byte [cadena]     ; Cargar el primer carácter de 'cadena' en rax
+   202 000001BD [0A000000]         
+   203 000001C1 4883E830                    sub rax, '0'                 ; Convertir de ASCII a valor numérico
+   204 000001C5 880425[52000000]            mov [posx_fin], al            ; Guardar el valor en 'posx_ini'
+   205                                      
+   206                                      ; Extraer el segundo carácter (segundo número)
+   207 000001CC 480FB60425-                 movzx rax, byte [cadena + 1] ; Cargar el segundo carácter de 'cadena' en rax
+   207 000001D1 [0B000000]         
+   208 000001D5 4883E830                    sub rax, '0'                 ; Convertir de ASCII a valor numérico
+   209 000001D9 880425[53000000]            mov [posy_fin], al            ; Guardar el valor en 'posy_ini'
+   210                                     
+   211 000001E0 4883C408                    add rsp, 8
+   212 000001E4 C3                          ret
+   213                                      
+   214                                  mostrar_jugador_actual:
+   215 000001E5 48BF-                       mov rdi, esTurnoDe
+   215 000001E7 [2100000000000000] 
+   216 000001EF 48BE-                       mov rsi, soldados
+   216 000001F1 [4000000000000000] 
+   217 000001F9 4883EC08                    sub rsp, 8
+   218 000001FD E8(00000000)                call printf
+   219 00000202 4883C408                    add rsp, 8

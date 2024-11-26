@@ -7,7 +7,7 @@ section .data
     msj		db	'Usted ingreso %s !!',10,0
     msj2		db	'Usted ingreso %li !!',10,0
     format	db	'%li',0
-    input       db       '14',0
+    input       db          "14",0
     
 section .bss
     numero resq 1
@@ -15,6 +15,7 @@ section .bss
 section .text
 main:
     sub rsp, 8            ; Align stack for calling conventions
+    
     
     mov rdi, msj
     mov rsi, input

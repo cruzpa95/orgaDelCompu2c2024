@@ -49,11 +49,13 @@ main:
     mov rbp, rsp; for correct debugging
     sub rsp, 8                ; Reserva espacio en la pila
     call mostrar_tablero
-    call actualizar_tablero
-    call clear_screen
-    
-    call mostrar_tablero
     call pedir_casillero_inicial
+    call pedir_casillero_final
+
+    call actualizar_tablero
+
+    call clear_screen
+    call mostrar_tablero
     fin:
     add rsp, 8             ; Restaura el espacio de la pila
     ret
@@ -97,14 +99,14 @@ actualizar_tablero:
     ;(i-1)*longitudFila + (j-1)*longitudElemento
     ;longitdFila= longitudElemento*cantidadColumnas
     sub rcx, rcx
-    mov al,[posx] ;guardo el valor de la fila, en AL(8bits) 
+    mov al,[posx_ini] ;guardo el valor de la fila, en AL(8bits) 
                     ;ya que posx es db (byte= 8bits) sino guarda cualquier cosa
 ;    sub rax,1 -> no es necesaria la resta ya que la matriz empieza en 1,1
     mov r8, cantidadFilas
     imul r8   ;me desplazo en la fila
     add rcx,rax
     
-    mov al,[posy] ;guardo el valor de la col,
+    mov al,[posy_ini] ;guardo el valor de la col,
 ;    sub rax,1
     mov r8, longitudElemento ;guardo en r8 para darle longitud y poder multiplicar usando imul
     imul r8 ;me desplazo en la columna
@@ -115,7 +117,7 @@ actualizar_tablero:
 
 
     mov r9, [rbx+1] ;guardo en r9 lo que le sigue de matriz posterior al elemento a actualizar
-    mov r8, "Z" ; lo muevo a un reg para darle (y estar seguro de su) longitud
+    mov r8, "Y" ; lo muevo a un reg para darle (y estar seguro de su) longitud
     mov [rbx],r8 ;muevo el valor(de igual longitud). muevo a la posicion de la matriz a actualizar
     
     ;despues de agregar el nuevo valor, agregarle el resto de la matriz que estaba antes.
@@ -147,11 +149,6 @@ pedir_casillero_inicial:
     sub rax, '0'                 ; Convertir de ASCII a valor numérico
     mov [posy_ini], al            ; Guardar el valor en 'posy_ini'
     
-      ; Imprimir los resultados
-;    movzx rsi, byte [posx_ini]    ; Cargar 'posx_ini' en rsi
-;    movzx rdx, byte [posy_ini]    ; Cargar 'posy_ini' en rdx
-;    lea rdi, [format2]            ; Formato de impresión
-;    call printf
    
     add rsp, 8
     
