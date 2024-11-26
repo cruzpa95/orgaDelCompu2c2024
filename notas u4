@@ -143,3 +143,40 @@ Clase II - Lenguaje ensamblador
 
 #para ver
 ###########################################################################################################################################################################
+
+
+
+
+
+para correr los ejercicios:
+
+
+nasm -f elf64 -g -F dwarf -l pedir_numero_gets.lst -o pedir_numero_gets.o pedir_numero_gets.asm
+
+gcc -no-pie -o pedir_numero_gets pedir_numero_gets.o
+
+./pedir_numero_gets
+
+dentro de gdb:
+next -> para ejecutar siguiente instruccion sirve para gets o sscanf
+
+x/s &cadena -> muestra la variable
+
+El comando x/s &cadena en GDB es utilizado para inspeccionar una dirección de memoria y mostrar su contenido interpretado como una cadena de caracteres (string). A continuación, te detallo su funcionamiento:
+
+x
+Es el comando para "examinar" memoria en GDB. Permite visualizar los valores almacenados en una dirección de memoria.
+
+/s
+El sufijo /s indica que el contenido en la dirección de memoria debe interpretarse como una cadena de caracteres terminada en null (\0).
+
+GDB recorrerá la memoria byte a byte desde la dirección proporcionada y mostrará los caracteres hasta encontrar un terminador de cadena (0x00).
+&cadena
+El símbolo & indica que queremos obtener la dirección de memoria de la variable cadena. Esto es importante porque en ensamblador o C, las variables representan direcciones, y GDB necesita esa dirección para inspeccionar el contenido.
+
+
+
+##################
+
+
+
