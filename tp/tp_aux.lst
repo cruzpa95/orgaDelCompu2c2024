@@ -85,7 +85,7 @@
     70 00000025 8A0425[CF000000]            mov al, [turno]
     71 0000002C 3C01                        cmp al, 1
     72 0000002E 740D                        je call_validar_movimiento_soldado
-    73                                  call_validar_movimiento_oficial:    
+    73                                  
     74 00000030 E869040000                  call validar_movimiento_oficial ;hacer esto solo si es el turno del oficial.
     75 00000035 4983FC00                    cmp r12, 0                  ; Si la validacion esta mal -> r12 != 0 -> volver a pedir origen-destin0
     76 00000039 75E0                        jne pedir_movimiento         ; Si no es 0 -> back to pedir_movimiento
@@ -396,169 +396,272 @@
    364 0000036F 4801CB                      add rbx,rcx ;me posicione en la matriz
    365                                  
    366 00000372 4C8B13                      mov r10, [rbx] ;guardo un elemento
-   367                                  ;;
-   368 00000375 4180FA58                    cmp r10b, 'X'
-   369 00000379 741C                        je turno_soldado_ok
-   370                                      ;sino fue un mal ingreso:
-   371                                  origen_invalido:
-   372 0000037B 48BF-                       mov rdi, casilleroInvalido
-   372 0000037D [7800000000000000] 
-   373 00000385 4883EC08                    sub rsp, 8
-   374 00000389 E8(00000000)                call printf
-   375 0000038E 4883C408                    add rsp, 8
-   376 00000392 E9F8FDFFFF                  jmp pedir_casillero_origen
-   377                                      turno_soldado_ok:
-   378 00000397 C3                          ret    
-   379                                      
-   380                                  es_oficial_valido:
-   381                                  ;busco el elemento en la matriz; y lo guardo en r10 para comparar el elemento.
-   382 00000398 4829C9                      sub rcx, rcx
-   383 0000039B 4829C0                      sub rax, rax
-   384 0000039E 4829DB                      sub rbx, rbx
-   385 000003A1 4D29D2                      sub r10, r10
-   386 000003A4 8A0425[34000000]            mov al,[posx_ini] 
-   387 000003AB 41B809000000                mov r8, cantidadFilas
-   388 000003B1 49F7E8                      imul r8
-   389 000003B4 4801C1                      add rcx,rax
-   390                                      
-   391 000003B7 8A0425[35000000]            mov al,[posy_ini]
-   392 000003BE 41B801000000                mov r8, longitudElemento 
-   393 000003C4 49F7E8                      imul r8
-   394 000003C7 4801C1                      add rcx,rax
-   395                                      
-   396 000003CA 48BB-                       mov rbx,matriz 
-   396 000003CC [D100000000000000] 
-   397 000003D4 4801CB                      add rbx,rcx ;me posicione en la matriz
-   398                                  
-   399 000003D7 4C8B13                      mov r10, [rbx] ;guardo un elemento
-   400                                  ;;
-   401 000003DA 4180FA4F                    cmp r10b, 'O'
-   402 000003DE 741C                        je turno_oficial_ok
-   403                                      ;sino fue un mal ingreso:
-   404 000003E0 48BF-                       mov rdi, casilleroInvalido
-   404 000003E2 [7800000000000000] 
-   405 000003EA 4883EC08                    sub rsp, 8
-   406 000003EE E8(00000000)                call printf
-   407 000003F3 4883C408                    add rsp, 8
-   408 000003F7 E993FDFFFF                  jmp pedir_casillero_origen
-   409                                      turno_oficial_ok:
-   410 000003FC C3                          ret    
+   367 00000375 4180FA58                    cmp r10b, 'X'
+   368 00000379 741C                        je turno_soldado_ok
+   369                                      ;sino fue un mal ingreso:
+   370                                  origen_invalido:
+   371 0000037B 48BF-                       mov rdi, casilleroInvalido
+   371 0000037D [7800000000000000] 
+   372 00000385 4883EC08                    sub rsp, 8
+   373 00000389 E8(00000000)                call printf
+   374 0000038E 4883C408                    add rsp, 8
+   375 00000392 E9F8FDFFFF                  jmp pedir_casillero_origen
+   376                                      turno_soldado_ok:
+   377 00000397 C3                          ret    
+   378                                      
+   379                                  es_oficial_valido:
+   380                                  ;busco el elemento en la matriz; y lo guardo en r10 para comparar el elemento.
+   381 00000398 4829C9                      sub rcx, rcx
+   382 0000039B 4829C0                      sub rax, rax
+   383 0000039E 4829DB                      sub rbx, rbx
+   384 000003A1 4D29D2                      sub r10, r10
+   385 000003A4 8A0425[34000000]            mov al,[posx_ini] 
+   386 000003AB 41B809000000                mov r8, cantidadFilas
+   387 000003B1 49F7E8                      imul r8
+   388 000003B4 4801C1                      add rcx,rax
+   389                                      
+   390 000003B7 8A0425[35000000]            mov al,[posy_ini]
+   391 000003BE 41B801000000                mov r8, longitudElemento 
+   392 000003C4 49F7E8                      imul r8
+   393 000003C7 4801C1                      add rcx,rax
+   394                                      
+   395 000003CA 48BB-                       mov rbx,matriz 
+   395 000003CC [D100000000000000] 
+   396 000003D4 4801CB                      add rbx,rcx ;me posicione en la matriz
+   397                                  
+   398 000003D7 4C8B13                      mov r10, [rbx] ;guardo un elemento
+   399                                  ;;
+   400 000003DA 4180FA4F                    cmp r10b, 'O'
+   401 000003DE 741C                        je turno_oficial_ok
+   402                                      ;sino fue un mal ingreso:
+   403 000003E0 48BF-                       mov rdi, casilleroInvalido
+   403 000003E2 [7800000000000000] 
+   404 000003EA 4883EC08                    sub rsp, 8
+   405 000003EE E8(00000000)                call printf
+   406 000003F3 4883C408                    add rsp, 8
+   407 000003F7 E993FDFFFF                  jmp pedir_casillero_origen
+   408                                      turno_oficial_ok:
+   409 000003FC C3                          ret    
+   410                                      
    411                                      
-   412                                      
-   413                                  es_destino_valido:
-   414                                      ;;valido que este dentro del tablero
-   415 000003FD 4829C0                      sub rax, rax
-   416 00000400 4829DB                      sub rbx, rbx
-   417 00000403 8A0425[36000000]            mov al,[posx_fin]
-   418 0000040A 8A1C25[37000000]            mov bl,[posy_fin]
-   419                                      
-   420                                  validar_dentro_x_fin:
-   421 00000411 3C01                        cmp al, 1
-   422 00000413 740E                        je validar_dentro_y_fin
-   423 00000415 3C02                        cmp al, 2
-   424 00000417 740A                        je validar_dentro_y_fin
-   425 00000419 3C06                        cmp al, 6
-   426 0000041B 7406                        je validar_dentro_y_fin
-   427 0000041D 3C07                        cmp al, 7
-   428 0000041F 7402                        je validar_dentro_y_fin
-   429 00000421 EB16                        jmp dentro_tablero_destino_ok
-   430                                  validar_dentro_y_fin:
-   431 00000423 80FB01                      cmp bl, 1
-   432 00000426 7459                        je destino_invalido
-   433 00000428 80FB02                      cmp bl, 2
-   434 0000042B 7454                        je destino_invalido
-   435 0000042D 80FB06                      cmp bl, 6
-   436 00000430 744F                        je destino_invalido
-   437 00000432 80FB07                      cmp bl, 7
-   438 00000435 744A                        je destino_invalido
-   439 00000437 EB00                        jmp dentro_tablero_destino_ok
-   440                                      
-   441                                  dentro_tablero_destino_ok:
-   442                                  ;busco el elemento en la matriz; y lo guardo en r10 para comparar el elemento.
-   443 00000439 4829C9                      sub rcx, rcx
-   444 0000043C 4829C0                      sub rax, rax
-   445 0000043F 4829DB                      sub rbx, rbx
-   446 00000442 4D29D2                      sub r10, r10
-   447 00000445 8A0425[36000000]            mov al,[posx_fin] 
-   448 0000044C 41B809000000                mov r8, cantidadFilas
-   449 00000452 49F7E8                      imul r8
-   450 00000455 4801C1                      add rcx,rax
-   451                                      
-   452 00000458 8A0425[37000000]            mov al,[posy_fin]
-   453 0000045F 41B801000000                mov r8, longitudElemento 
-   454 00000465 49F7E8                      imul r8
-   455 00000468 4801C1                      add rcx,rax
-   456                                      
-   457 0000046B 48BB-                       mov rbx,matriz 
-   457 0000046D [D100000000000000] 
-   458 00000475 4801CB                      add rbx,rcx ;me posicione en la matriz
-   459                                  
-   460 00000478 4C8B13                      mov r10, [rbx] ;guardo un elemento
-   461                                  ;;
-   462 0000047B 4180FA20                    cmp r10b, ' '
-   463 0000047F 741C                        je destino_ok
-   464                                      ;sino fue un mal ingreso:
-   465                                  destino_invalido:
-   466 00000481 48BF-                       mov rdi, casilleroInvalido
-   466 00000483 [7800000000000000] 
-   467 0000048B 4883EC08                    sub rsp, 8
-   468 0000048F E8(00000000)                call printf
-   469 00000494 4883C408                    add rsp, 8
-   470 00000498 E953FDFFFF                  jmp pedir_casillero_destino
-   471                                      destino_ok:
-   472 0000049D C3                          ret    
-   473                                  validar_movimiento_oficial:
-   474                                  ;;falta resolver esto -> solo de a 1 en cualqeuir dir.
-   475 0000049E 41BC00000000                mov r12,0
-   476 000004A4 B800000000                  mov rax,0
-   477                                  
-   478 000004A9 8A0425[34000000]            mov al, [posx_ini]
-   479 000004B0 8A2425[36000000]            mov ah, [posx_fin]
-   480 000004B7 28E0                        sub al,ah
-   481 000004B9 3C00                        cmp al, 0
-   482 000004BB 740A                        je validar_movimiento_oficial_y_horizontal
-   483 000004BD 3C01                        cmp al, 1
-   484 000004BF 7425                        je validar_movimiento_oficial_y_arriba_abajo
-   485 000004C1 3CFF                        cmp al,-1
-   486 000004C3 7421                        je validar_movimiento_oficial_y_arriba_abajo
-   487 000004C5 EB49                        jmp movimiento_oficial_invalido
-   488                                      
-   489                                  validar_movimiento_oficial_y_horizontal:
-   490 000004C7 B800000000                  mov rax,0
-   491 000004CC 8A0425[35000000]            mov al, [posy_ini]
-   492 000004D3 8A2425[37000000]            mov ah, [posy_fin]
-   493 000004DA 28E0                        sub al,ah
-   494 000004DC 3C01                        cmp al, 1
-   495 000004DE 7429                        je movimiento_oficial_ok
-   496 000004E0 3CFF                        cmp al,-1
-   497 000004E2 7425                        je movimiento_oficial_ok
-   498 000004E4 EB2A                        jmp movimiento_oficial_invalido
-   499                                  validar_movimiento_oficial_y_arriba_abajo:
-   500 000004E6 B800000000                  mov rax,0
-   501 000004EB 8A0425[35000000]            mov al, [posy_ini]
-   502 000004F2 8A2425[37000000]            mov ah, [posy_fin]
-   503 000004F9 28E0                        sub al,ah
-   504 000004FB 3C01                        cmp al, 1
-   505 000004FD 740A                        je movimiento_oficial_ok
-   506 000004FF 3C00                        cmp al, 0
-   507 00000501 7406                        je movimiento_oficial_ok
-   508 00000503 3CFF                        cmp al,-1
-   509 00000505 7402                        je movimiento_oficial_ok
-   510 00000507 EB07                        jmp movimiento_oficial_invalido
-   511                                      
-   512                                      
-   513                                  movimiento_oficial_ok:
-   514 00000509 41BC00000000                mov r12,0
-   515 0000050F C3                          ret
-   516                                  movimiento_oficial_invalido:
-   517 00000510 48BF-                       mov rdi,msj_movimiento_oficial_invalido
-   517 00000512 [8D00000000000000] 
-   518 0000051A 4883EC08                    sub rsp, 8
-   519 0000051E E8(00000000)                call printf
-   520 00000523 4883C408                    add rsp,8
-   521                                      
-   522 00000527 41BC01000000                mov r12,1
-   523 0000052D C3                          ret
-   524                                  
-   525                                      
-   526                                      
+   412                                  es_destino_valido:
+   413                                      ;;valido que este dentro del tablero
+   414 000003FD 4829C0                      sub rax, rax
+   415 00000400 4829DB                      sub rbx, rbx
+   416 00000403 8A0425[36000000]            mov al,[posx_fin]
+   417 0000040A 8A1C25[37000000]            mov bl,[posy_fin]
+   418                                      
+   419                                  validar_dentro_x_fin:
+   420 00000411 3C01                        cmp al, 1
+   421 00000413 740E                        je validar_dentro_y_fin
+   422 00000415 3C02                        cmp al, 2
+   423 00000417 740A                        je validar_dentro_y_fin
+   424 00000419 3C06                        cmp al, 6
+   425 0000041B 7406                        je validar_dentro_y_fin
+   426 0000041D 3C07                        cmp al, 7
+   427 0000041F 7402                        je validar_dentro_y_fin
+   428 00000421 EB16                        jmp dentro_tablero_destino_ok
+   429                                  validar_dentro_y_fin:
+   430 00000423 80FB01                      cmp bl, 1
+   431 00000426 7459                        je destino_invalido
+   432 00000428 80FB02                      cmp bl, 2
+   433 0000042B 7454                        je destino_invalido
+   434 0000042D 80FB06                      cmp bl, 6
+   435 00000430 744F                        je destino_invalido
+   436 00000432 80FB07                      cmp bl, 7
+   437 00000435 744A                        je destino_invalido
+   438 00000437 EB00                        jmp dentro_tablero_destino_ok
+   439                                      
+   440                                  dentro_tablero_destino_ok:
+   441                                  ;busco el elemento en la matriz; y lo guardo en r10 para comparar el elemento.
+   442 00000439 4829C9                      sub rcx, rcx
+   443 0000043C 4829C0                      sub rax, rax
+   444 0000043F 4829DB                      sub rbx, rbx
+   445 00000442 4D29D2                      sub r10, r10
+   446 00000445 8A0425[36000000]            mov al,[posx_fin] 
+   447 0000044C 41B809000000                mov r8, cantidadFilas
+   448 00000452 49F7E8                      imul r8
+   449 00000455 4801C1                      add rcx,rax
+   450                                      
+   451 00000458 8A0425[37000000]            mov al,[posy_fin]
+   452 0000045F 41B801000000                mov r8, longitudElemento 
+   453 00000465 49F7E8                      imul r8
+   454 00000468 4801C1                      add rcx,rax
+   455                                      
+   456 0000046B 48BB-                       mov rbx,matriz 
+   456 0000046D [D100000000000000] 
+   457 00000475 4801CB                      add rbx,rcx ;me posicione en la matriz
+   458                                  
+   459 00000478 4C8B13                      mov r10, [rbx] ;guardo un elemento
+   460                                  ;;
+   461 0000047B 4180FA20                    cmp r10b, ' '
+   462 0000047F 741C                        je destino_ok
+   463                                      ;sino fue un mal ingreso:
+   464                                  destino_invalido:
+   465 00000481 48BF-                       mov rdi, casilleroInvalido
+   465 00000483 [7800000000000000] 
+   466 0000048B 4883EC08                    sub rsp, 8
+   467 0000048F E8(00000000)                call printf
+   468 00000494 4883C408                    add rsp, 8
+   469 00000498 E953FDFFFF                  jmp pedir_casillero_destino
+   470                                      destino_ok:
+   471 0000049D C3                          ret    
+   472                                  validar_movimiento_oficial:
+   473                                  ;;falta resolver esto -> solo de a 1 en cualqeuir dir.
+   474 0000049E 41BC00000000                mov r12,0
+   475 000004A4 B800000000                  mov rax,0
+   476 000004A9 8A0425[34000000]            mov al, [posx_ini]
+   477 000004B0 8A2425[36000000]            mov ah, [posx_fin]
+   478 000004B7 28E0                        sub al,ah
+   479                                  
+   480 000004B9 BA00000000                  mov rdx,0
+   481 000004BE 8A1425[35000000]            mov dl, [posy_ini]
+   482 000004C5 8A3425[37000000]            mov dh, [posy_fin]
+   483 000004CC 28F2                        sub dl,dh
+   484                                  
+   485 000004CE 3C00                        cmp al, 0
+   486 000004D0 7410                        je validar_movimientos_oficial_horizontal ;;listo
+   487 000004D2 3C01                        cmp al, 1
+   488 000004D4 7428                        je validar_movimiento_simple_oficial_arriba_abajo ;;listo
+   489 000004D6 3CFF                        cmp al,-1
+   490 000004D8 7424                        je validar_movimiento_simple_oficial_arriba_abajo ;;listo
+   491                                      
+   492 000004DA 3C02                        cmp al, 2
+   493 000004DC 7440                        je validar_movimiento_doble_oficial_superiores ;;voy a validar esto
+   494 000004DE 3CFE                        cmp al,-2
+   495 000004E0 7450                        je validar_movimiento_doble_oficial_inferiores ;;falta validar
+   496                                      
+   497                                  ;;esto valida OK movimientos simples y dobles horizontales (falta validar dobles horizontales)
+   498                                  validar_movimientos_oficial_horizontal:
+   499                                      ;;movimiento simple
+   500 000004E2 80FA01                      cmp dl, 1
+   501 000004E5 0F84DB000000                je movimiento_oficial_ok
+   502 000004EB 80FAFF                      cmp dl,-1
+   503 000004EE 0F84D2000000                je movimiento_oficial_ok
+   504                                      ;;movimiento doble (comio)
+   505 000004F4 80FA02                      cmp dl, 2
+   506 000004F7 744D                        je validar_movimiento_doble_izquierda ;; aca falta validar que haya X en el medio
+   507 000004F9 80FAFE                      cmp dl,-2
+   508 000004FC 744C                        je validar_movimiento_doble_derecha ;; aca falta validar que haya X en el medio
+   509                                  ;funcion ready (no necesita nada mas)
+   510                                  validar_movimiento_simple_oficial_arriba_abajo:
+   511                                      ;;si se movio 1 en x, solo puede ser movimiento simple
+   512 000004FE 80FA01                      cmp dl, 1
+   513 00000501 0F84BF000000                je movimiento_oficial_ok
+   514 00000507 80FAFF                      cmp dl,-1
+   515 0000050A 0F84B6000000                je movimiento_oficial_ok
+   516 00000510 80FA00                      cmp dl, 0
+   517 00000513 0F84AD000000                je movimiento_oficial_ok
+   518 00000519 E9AF000000                  jmp movimiento_oficial_invalido
+   519                                  
+   520                                  ;;movimientos dobles!
+   521                                  validar_movimiento_doble_oficial_superiores:
+   522 0000051E 80FA02                      cmp dl, 2
+   523 00000521 742B                        je validar_movimiento_doble_izquierda_superior
+   524 00000523 80FAFE                      cmp dl,-2
+   525 00000526 7430                        je validar_movimiento_doble_derecha_superior
+   526 00000528 80FA00                      cmp dl, 0
+   527 0000052B 7427                        je validar_movimiento_doble_superior
+   528 0000052D E99B000000                  jmp movimiento_oficial_invalido
+   529                                  
+   530                                  validar_movimiento_doble_oficial_inferiores:
+   531 00000532 80FA02                      cmp dl, 2
+   532 00000535 7427                        je validar_movimiento_doble_izquierda_inferior
+   533 00000537 80FAFE                      cmp dl,-2
+   534 0000053A 742C                        je validar_movimiento_doble_derecha_inferior
+   535 0000053C 80FA00                      cmp dl, 0
+   536 0000053F 7423                        je validar_movimiento_doble_inferior
+   537 00000541 E987000000                  jmp movimiento_oficial_invalido
+   538                                      
+   539                                  ;;tengo que validar que haya una X en los movimientos dobles
+   540                                  ;;voy a setear una posicion posx - posy para buscar elemento en la matriz
+   541                                  ;;si hay una X efectivamente habia un soldado -> eliminar soldado -> movimiento ok!
+   542                                  ;;else invalido.
+   543                                  
+   544                                  ;;hasta este momento en ah y dh estan los valores x y destino respectivamente
+   545                                  validar_movimiento_doble_izquierda:
+   546 00000546 FEC6                        inc dh
+   547 00000548 EB24                        jmp validar_habia_soldado_en_movimiento_doble
+   548                                  validar_movimiento_doble_derecha:
+   549 0000054A FECE                        dec dh
+   550 0000054C EB20                        jmp validar_habia_soldado_en_movimiento_doble
+   551                                  validar_movimiento_doble_izquierda_superior:
+   552 0000054E FEC6                        inc dh
+   553 00000550 FEC4                        inc ah
+   554 00000552 EB1A                        jmp validar_habia_soldado_en_movimiento_doble
+   555                                  validar_movimiento_doble_superior:
+   556 00000554 FEC4                        inc ah
+   557 00000556 EB16                        jmp validar_habia_soldado_en_movimiento_doble
+   558                                  validar_movimiento_doble_derecha_superior:
+   559 00000558 FECE                        dec dh
+   560 0000055A FEC4                        inc ah
+   561 0000055C EB10                        jmp validar_habia_soldado_en_movimiento_doble
+   562                                  validar_movimiento_doble_izquierda_inferior:
+   563 0000055E FEC6                        inc dh
+   564 00000560 FECC                        dec ah
+   565 00000562 EB0A                        jmp validar_habia_soldado_en_movimiento_doble
+   566                                  validar_movimiento_doble_inferior:
+   567 00000564 FECC                        dec ah
+   568 00000566 EB06                        jmp validar_habia_soldado_en_movimiento_doble
+   569                                  validar_movimiento_doble_derecha_inferior:
+   570 00000568 FECE                        dec dh
+   571 0000056A FECC                        dec ah
+   572 0000056C EB00                        jmp validar_habia_soldado_en_movimiento_doble
+   573                                  
+   574                                  
+   575                                  ;;falta estar seguro de lo que hago aca. (validar X e Y..)
+   576                                  validar_habia_soldado_en_movimiento_doble:
+   577                                      
+   578 0000056E 4829DB                      sub rbx, rbx
+   579 00000571 88E3                        mov bl, ah      
+   580 00000573 4829C0                      sub rax, rax      
+   581 00000576 88D8                        mov al, bl
+   582                                  
+   583 00000578 4829DB                      sub rbx, rbx
+   584 0000057B 88F3                        mov bl, dh      
+   585 0000057D 4829D2                      sub rdx, rdx      
+   586 00000580 88DA                        mov dl, bl
+   587                                  
+   588 00000582 4829DB                      sub rbx, rbx
+   589 00000585 4829C9                      sub rcx, rcx
+   590                                      
+   591 00000588 4D29C0                      sub r8, r8
+   592 0000058B 4D29C9                      sub r9, r9
+   593 0000058E 4D29D2                      sub r10, r10
+   594 00000591 4D29DB                      sub r11, r11
+   595                                      
+   596                                   
+   597 00000594 41B809000000                mov r8, cantidadFilas
+   598 0000059A 49F7E8                      imul r8
+   599 0000059D 4801C1                      add rcx,rax
+   600                                      
+   601 000005A0 88D0                        mov al, dl
+   602 000005A2 41B801000000                mov r8, longitudElemento 
+   603 000005A8 49F7E8                      imul r8
+   604 000005AB 4801C1                      add rcx,rax
+   605                                      
+   606 000005AE 48BB-                       mov rbx,matriz 
+   606 000005B0 [D100000000000000] 
+   607 000005B8 4801CB                      add rbx,rcx ;me posicione en la matriz
+   608                                  
+   609 000005BB 4C8B13                      mov r10, [rbx] ;guardo un elemento
+   610 000005BE 4180FA58                    cmp r10b, 'X'
+   611 000005C2 7402                        je movimiento_oficial_ok
+   612 000005C4 EB07                        jmp movimiento_oficial_invalido
+   613                                  
+   614                                  ;;fin;; validaciones terminan en estas 2 funciones.
+   615                                  movimiento_oficial_ok:
+   616 000005C6 41BC00000000                mov r12,0
+   617 000005CC C3                          ret
+   618                                  movimiento_oficial_invalido:
+   619 000005CD 48BF-                       mov rdi,msj_movimiento_oficial_invalido
+   619 000005CF [8D00000000000000] 
+   620 000005D7 4883EC08                    sub rsp, 8
+   621 000005DB E8(00000000)                call printf
+   622 000005E0 4883C408                    add rsp,8
+   623                                      
+   624 000005E4 41BC01000000                mov r12,1
+   625 000005EA C3                          ret
+   626                                  
+   627                                      
+   628                                      
