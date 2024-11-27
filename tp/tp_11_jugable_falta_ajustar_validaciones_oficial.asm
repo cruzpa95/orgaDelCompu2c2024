@@ -581,24 +581,28 @@ validar_habia_soldado_en_movimiento_doble:
     mov al, bl
 
     sub rbx, rbx
-    mov bl, dh
-                
+    mov bl, dh      
+    sub rdx, rdx      
+    mov dl, bl
+
+    sub rbx, rbx
     sub rcx, rcx
-    sub rdx, rdx
+    
     sub r8, r8
+    sub r9, r9
     sub r10, r10
+    sub r11, r11
     
  
     mov r8, cantidadFilas
     imul r8
     add rcx,rax
     
-    mov al, bl
+    mov al, dl
     mov r8, longitudElemento 
     imul r8
     add rcx,rax
     
-    sub rbx, rbx   
     mov rbx,matriz 
     add rbx,rcx ;me posicione en la matriz
 

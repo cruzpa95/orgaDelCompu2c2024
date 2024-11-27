@@ -535,9 +535,9 @@
    498                                  validar_movimientos_oficial_horizontal:
    499                                      ;;movimiento simple
    500 000004E2 80FA01                      cmp dl, 1
-   501 000004E5 0F84DB000000                je movimiento_oficial_ok
+   501 000004E5 0F84D3000000                je movimiento_oficial_ok
    502 000004EB 80FAFF                      cmp dl,-1
-   503 000004EE 0F84D2000000                je movimiento_oficial_ok
+   503 000004EE 0F84CA000000                je movimiento_oficial_ok
    504                                      ;;movimiento doble (comio)
    505 000004F4 80FA02                      cmp dl, 2
    506 000004F7 744D                        je validar_movimiento_doble_izquierda ;; aca falta validar que haya X en el medio
@@ -547,12 +547,12 @@
    510                                  validar_movimiento_simple_oficial_arriba_abajo:
    511                                      ;;si se movio 1 en x, solo puede ser movimiento simple
    512 000004FE 80FA01                      cmp dl, 1
-   513 00000501 0F84BF000000                je movimiento_oficial_ok
+   513 00000501 0F84B7000000                je movimiento_oficial_ok
    514 00000507 80FAFF                      cmp dl,-1
-   515 0000050A 0F84B6000000                je movimiento_oficial_ok
+   515 0000050A 0F84AE000000                je movimiento_oficial_ok
    516 00000510 80FA00                      cmp dl, 0
-   517 00000513 0F84AD000000                je movimiento_oficial_ok
-   518 00000519 E9AF000000                  jmp movimiento_oficial_invalido
+   517 00000513 0F84A5000000                je movimiento_oficial_ok
+   518 00000519 E9B8000000                  jmp movimiento_oficial_invalido
    519                                  
    520                                  ;;movimientos dobles!
    521                                  validar_movimiento_doble_oficial_superiores:
@@ -562,7 +562,7 @@
    525 00000526 7430                        je validar_movimiento_doble_derecha_superior
    526 00000528 80FA00                      cmp dl, 0
    527 0000052B 7427                        je validar_movimiento_doble_superior
-   528 0000052D E99B000000                  jmp movimiento_oficial_invalido
+   528 0000052D E9A4000000                  jmp movimiento_oficial_invalido
    529                                  
    530                                  validar_movimiento_doble_oficial_inferiores:
    531 00000532 80FA02                      cmp dl, 2
@@ -571,7 +571,7 @@
    534 0000053A 742C                        je validar_movimiento_doble_derecha_inferior
    535 0000053C 80FA00                      cmp dl, 0
    536 0000053F 7423                        je validar_movimiento_doble_inferior
-   537 00000541 E987000000                  jmp movimiento_oficial_invalido
+   537 00000541 E990000000                  jmp movimiento_oficial_invalido
    538                                      
    539                                  ;;tengo que validar que haya una X en los movimientos dobles
    540                                  ;;voy a setear una posicion posx - posy para buscar elemento en la matriz
@@ -618,50 +618,54 @@
    581 00000576 88D8                        mov al, bl
    582                                  
    583 00000578 4829DB                      sub rbx, rbx
-   584 0000057B 88F3                        mov bl, dh      
-   585 0000057D 4829D2                      sub rdx, rdx      
-   586 00000580 88DA                        mov dl, bl
-   587                                  
-   588 00000582 4829DB                      sub rbx, rbx
-   589 00000585 4829C9                      sub rcx, rcx
+   584 0000057B 88F3                        mov bl, dh
+   585                                                  
+   586 0000057D 4829C9                      sub rcx, rcx
+   587 00000580 4829D2                      sub rdx, rdx
+   588 00000583 4D29C0                      sub r8, r8
+   589 00000586 4D29D2                      sub r10, r10
    590                                      
-   591 00000588 4D29C0                      sub r8, r8
-   592 0000058B 4D29C9                      sub r9, r9
-   593 0000058E 4D29D2                      sub r10, r10
-   594 00000591 4D29DB                      sub r11, r11
+   591                                   
+   592 00000589 41B809000000                mov r8, cantidadFilas
+   593 0000058F 49F7E8                      imul r8
+   594 00000592 4801C1                      add rcx,rax
    595                                      
-   596                                   
-   597 00000594 41B809000000                mov r8, cantidadFilas
-   598 0000059A 49F7E8                      imul r8
-   599 0000059D 4801C1                      add rcx,rax
+   596 00000595 88D8                        mov al, bl
+   597 00000597 41B801000000                mov r8, longitudElemento 
+   598 0000059D 49F7E8                      imul r8
+   599 000005A0 4801C1                      add rcx,rax
    600                                      
-   601 000005A0 88D0                        mov al, dl
-   602 000005A2 41B801000000                mov r8, longitudElemento 
-   603 000005A8 49F7E8                      imul r8
-   604 000005AB 4801C1                      add rcx,rax
-   605                                      
-   606 000005AE 48BB-                       mov rbx,matriz 
-   606 000005B0 [D100000000000000] 
-   607 000005B8 4801CB                      add rbx,rcx ;me posicione en la matriz
-   608                                  
-   609 000005BB 4C8B13                      mov r10, [rbx] ;guardo un elemento
-   610 000005BE 4180FA58                    cmp r10b, 'X'
-   611 000005C2 7402                        je movimiento_oficial_ok
-   612 000005C4 EB07                        jmp movimiento_oficial_invalido
-   613                                  
-   614                                  ;;fin;; validaciones terminan en estas 2 funciones.
-   615                                  movimiento_oficial_ok:
-   616 000005C6 41BC00000000                mov r12,0
-   617 000005CC C3                          ret
-   618                                  movimiento_oficial_invalido:
-   619 000005CD 48BF-                       mov rdi,msj_movimiento_oficial_invalido
-   619 000005CF [8D00000000000000] 
-   620 000005D7 4883EC08                    sub rsp, 8
-   621 000005DB E8(00000000)                call printf
-   622 000005E0 4883C408                    add rsp,8
-   623                                      
-   624 000005E4 41BC01000000                mov r12,1
-   625 000005EA C3                          ret
-   626                                  
+   601 000005A3 4829DB                      sub rbx, rbx   
+   602 000005A6 48BB-                       mov rbx,matriz 
+   602 000005A8 [D100000000000000] 
+   603 000005B0 4801CB                      add rbx,rcx ;me posicione en la matriz
+   604                                  
+   605 000005B3 4C8B13                      mov r10, [rbx] ;guardo un elemento
+   606 000005B6 4180FA58                    cmp r10b, 'X'
+   607 000005BA 7402                        je movimiento_oficial_ok
+   608 000005BC EB18                        jmp movimiento_oficial_invalido
+   609                                  
+   610                                  ;;fin;; validaciones terminan en estas 2 funciones.
+   611                                  movimiento_oficial_ok:
+   612                                      
+   613 000005BE 4C8B4B01                    mov r9, [rbx+1] ;guardo en r9 lo que le sigue de matriz posterior al elemento a actualizar
+   614 000005C2 41B820000000                mov r8, " " ; lo muevo a un reg para darle (y estar seguro de su) longitud
+   615 000005C8 4C8903                      mov [rbx],r8 ;muevo el valor(de igual longitud). muevo a la posicion de la matriz a actualizar
+   616                                      
+   617                                      ;despues de agregar el nuevo valor, agregarle el resto de la matriz que estaba antes.
+   618 000005CB 4C894B01                    mov [rbx+1],r9
+   619                                      
+   620 000005CF 41BC00000000                mov r12,0
+   621 000005D5 C3                          ret
+   622                                  movimiento_oficial_invalido:
+   623 000005D6 48BF-                       mov rdi,msj_movimiento_oficial_invalido
+   623 000005D8 [8D00000000000000] 
+   624 000005E0 4883EC08                    sub rsp, 8
+   625 000005E4 E8(00000000)                call printf
+   626 000005E9 4883C408                    add rsp,8
    627                                      
-   628                                      
+   628 000005ED 41BC01000000                mov r12,1
+   629 000005F3 C3                          ret
+   630                                  
+   631                                      
+   632                                      
