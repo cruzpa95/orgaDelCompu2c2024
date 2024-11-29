@@ -40,13 +40,13 @@ section .data
     divisor db 2 
     
     matriz  db ' 1234567',0
-            db '1 |XXX| ',0
-            db '2_|XXX|_',0
-            db '3XXXXXXX',0
-            db '4XXX XXX',0
-            db '5XX X XX',0
-            db '6~|  O|~',0
-            db '7 |O  | ',0
+            db '1X XXX  ',0
+            db '2  X X  ',0
+            db '3X    XX',0
+            db '4X  O  X',0
+            db '5XX   XX',0
+            db '6    O  ',0
+            db '7  O    ',0
 
 section .bss    
     buffer		resb	10
@@ -55,7 +55,7 @@ section .bss
 
 section .text
 main:
-    mov rbp, rsp; for correct debugging
+    mov rbp, rsp; for correct debugging   
     sub rsp, 8
     call asignar_jugador_inicial
 ciclo_juego:
@@ -64,8 +64,9 @@ ciclo_juego:
     call mostrar_jugador_actual
 pedir_movimiento:
     call pedir_casillero_origen
-pedir_movimiento_destino:
     call pedir_casillero_destino
+
+
 
     mov al, [turno]
     cmp al, 1
@@ -361,13 +362,10 @@ clear_screen:
     
 pedir_casillero_origen:
     
-    mov rax, rsp
-    and rax, 15
-    je no_restar_rsp_1
     sub rsp, 8
-no_restar_rsp_1:
     mov rdi, msjIngFilaColumnaOrigen
     call printf
+
 
     mov rdi, cadena      ; Dirección de 'cadena'
     call gets
@@ -525,8 +523,8 @@ origen_invalido:
     call printf
     add rsp, 8
     jmp pedir_casillero_origen
-turno_soldado_ok:
-    ret
+    turno_soldado_ok:
+    ret    
     
 es_oficial_valido:
 ;busco el elemento en la matriz; y lo guardo en r10 para comparar el elemento.
@@ -619,7 +617,7 @@ destino_invalido:
     call printf
     add rsp, 8
     jmp pedir_casillero_destino
-destino_ok:
+    destino_ok:
     ret    
 validar_movimiento_oficial:
 ;;falta resolver esto -> solo de a 1 en cualqeuir dir.
@@ -781,18 +779,14 @@ movimiento_oficial_invalido:
     ret
 
 movimiento_soldado_invalido:
-    mov rax, rsp
-    and rax, 15
-    je no_restar_rsp
-    sub rsp, 8
-no_restar_rsp:
-    mov rdi,msj_movimiento_soldado_invalido
-    call printf
-    add rsp,8
+    ;sub rsp, 8
+    ;mov rdi,msj_movimiento_soldado_invalido
+    ;call printf
+    ;add rsp,8
     jmp pedir_movimiento
 
 movimiento_soldado_valido:
-    ret
+    jmp prox_turno
 
     
     

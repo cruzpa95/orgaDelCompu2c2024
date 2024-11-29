@@ -40,13 +40,13 @@ section .data
     divisor db 2 
     
     matriz  db ' 1234567',0
-            db '1 |XXX| ',0
-            db '2_|XXX|_',0
-            db '3XXXXXXX',0
-            db '4XXX XXX',0
-            db '5XX X XX',0
-            db '6~|  O|~',0
-            db '7 |O  | ',0
+            db '1X XXX  ',0
+            db '2  X X  ',0
+            db '3X    XX',0
+            db '4X  O  X',0
+            db '5XX   XX',0
+            db '6    O  ',0
+            db '7  O    ',0
 
 section .bss    
     buffer		resb	10
@@ -55,7 +55,7 @@ section .bss
 
 section .text
 main:
-    mov rbp, rsp; for correct debugging
+     mov rbp, rsp; for correct debugging   
     sub rsp, 8
     call asignar_jugador_inicial
 ciclo_juego:
@@ -64,18 +64,22 @@ ciclo_juego:
     call mostrar_jugador_actual
 pedir_movimiento:
     call pedir_casillero_origen
-pedir_movimiento_destino:
     call pedir_casillero_destino
+
+
 
     mov al, [turno]
     cmp al, 1
     je validar_movimiento_soldado
+    ;else
     call validar_movimiento_oficial ;hacer esto solo si es el turno del oficial.
     cmp r12, 0                  ; Si la validacion esta mal -> r12 != 0 -> volver a pedir origen-destin0
     jne pedir_movimiento         ; Si no es 0 -> back to pedir_movimiento
     jmp prox_turno
 
 validar_movimiento_soldado:
+    mov r12,0
+
     mov rax,0
     
     mov al, [posx_fin]
@@ -88,8 +92,7 @@ validar_movimiento_soldado:
     je validar_movimiento_soldado_arriba
     cmp al, 1
     je validar_movimiento_soldado_abajo
-    jmp movimiento_soldado_invalido
-    
+
 ;fn terminada
 validar_movimiento_soldado_horizontal:
     mov rax,0
@@ -141,7 +144,6 @@ validar_movimiento_soldado_horizontal_fila_cinco:
     je movimiento_soldado_derecha_izquierda
     cmp dl, 7
     jle movimiento_soldado_derecha
-    jmp movimiento_soldado_invalido
 
 movimiento_soldado_derecha:
     sub dh,dl
@@ -217,11 +219,11 @@ validar_movimiento_soldado_abajo:
     
     sub dh, dl
     cmp dh,-1
-    je movimiento_soldado_valido
+    je movimiento_oficial_ok
     cmp dh, 0
-    je movimiento_soldado_valido
+    je movimiento_oficial_ok
     cmp dh, 1
-    je movimiento_soldado_valido
+    je movimiento_oficial_ok
     jmp movimiento_soldado_invalido
 
 ;;fin validar_movimiento_soldado
@@ -361,13 +363,10 @@ clear_screen:
     
 pedir_casillero_origen:
     
-    mov rax, rsp
-    and rax, 15
-    je no_restar_rsp_1
     sub rsp, 8
-no_restar_rsp_1:
     mov rdi, msjIngFilaColumnaOrigen
     call printf
+
 
     mov rdi, cadena      ; Dirección de 'cadena'
     call gets
@@ -525,8 +524,8 @@ origen_invalido:
     call printf
     add rsp, 8
     jmp pedir_casillero_origen
-turno_soldado_ok:
-    ret
+    turno_soldado_ok:
+    ret    
     
 es_oficial_valido:
 ;busco el elemento en la matriz; y lo guardo en r10 para comparar el elemento.
@@ -619,7 +618,7 @@ destino_invalido:
     call printf
     add rsp, 8
     jmp pedir_casillero_destino
-destino_ok:
+    destino_ok:
     ret    
 validar_movimiento_oficial:
 ;;falta resolver esto -> solo de a 1 en cualqeuir dir.
@@ -779,17 +778,14 @@ movimiento_oficial_invalido:
     
     mov r12,1
     ret
-
 movimiento_soldado_invalido:
-    mov rax, rsp
-    and rax, 15
-    je no_restar_rsp
-    sub rsp, 8
-no_restar_rsp:
     mov rdi,msj_movimiento_soldado_invalido
+    sub rsp, 8
     call printf
     add rsp,8
-    jmp pedir_movimiento
+    
+    mov r12,1
+    ret
 
 movimiento_soldado_valido:
     ret

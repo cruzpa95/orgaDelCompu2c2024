@@ -11,7 +11,7 @@ section .data
     result db 0
     ty  db 'chaucha',0
 
-    tabla times 144 db 1, 0
+    tabla times 150 dd 1
 
 section .text
 main:
