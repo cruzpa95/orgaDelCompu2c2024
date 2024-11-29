@@ -35,6 +35,10 @@ section .data
     msj_movimiento_oficial_invalido db 'movimiento_oficial_invalido! Vuelva a intentarlo',10,0
     msj_movimiento_soldado_invalido db 'movimiento_soldado_invalido! Vuelva a intentarlo',10,0
 
+    msj_ganaron_soldados_por_falta_oficiales db 'Ganaron los soldados, no hay mas oficiales que puedan defender la fortaleza!',10,0
+    msj_ganaron_soldados_por_invasion db 'Ganaron los soldados, invadieron la fortaleza!',10,0
+    msj_ganaron_oficiales_por_falta_soldados db 'Ganaron los oficiales, ya no quedan mas soldados!',10,0
+
     endGame    db 'Fin del juego!',10,0
     turno db 1
     divisor db 2 
@@ -42,11 +46,11 @@ section .data
     matriz  db ' 1234567',0
             db '1 |XXX| ',0
             db '2_|XXX|_',0
-            db '3XXXXXXX',0
+            db '3O XXXXX',0
             db '4XXX XXX',0
-            db '5XX X XX',0
-            db '6~|  O|~',0
-            db '7 |O  | ',0
+            db '5XXXX XX',0
+            db '6~|XXX|~',0
+            db '7 |XXX| ',0
 
 section .bss    
     buffer		resb	10
@@ -57,6 +61,7 @@ section .text
 main:
     mov rbp, rsp; for correct debugging
     sub rsp, 8
+    mov r14, 2 ;seteo cantidad de oficiales.
     call asignar_jugador_inicial
 ciclo_juego:
     call clear_screen
@@ -140,7 +145,7 @@ validar_movimiento_soldado_horizontal_fila_cinco:
     cmp dl, 4
     je movimiento_soldado_derecha_izquierda
     cmp dl, 7
-    jle movimiento_soldado_derecha
+    jle movimiento_soldado_izquierda
     jmp movimiento_soldado_invalido
 
 movimiento_soldado_derecha:
@@ -230,11 +235,13 @@ validar_movimiento_soldado_abajo:
 prox_turno:
     call actualizar_turno
     call actualizar_tablero
+    ;call eliminar_oficial_desentendido
+    call verificar_ganador
     jmp ciclo_juego      ; Repite el bucle
         
     fin:
 ;    add rsp, 8             ; Restaura el espacio de la pila
-    call clear_screen
+    ;call clear_screen
 
     mov rdi, endGame
     sub rsp, 8
@@ -792,7 +799,75 @@ no_restar_rsp:
     jmp pedir_movimiento
 
 movimiento_soldado_valido:
+    jmp prox_turno
+
+verificar_ganador:
+    cmp r14, 0
+    je ganaron_soldados_por_falta_oficiales
+verificar_invasion:
+    sub rcx, rcx
+    sub rax, rax
+    sub rbx, rbx
+    sub r10, r10
+    mov al, 5
+    mov r8, cantidadFilas
+    imul r8
+    add rcx,rax
+    
+    mov al, 3
+    mov r8, longitudElemento 
+    imul r8
+    add rcx,rax
+    
+    mov rbx,matriz 
+    add rbx,rcx ;me posicione en la matriz
+
+;fila_5_fortaleza
+    mov r10, [rbx] ;guardo un elemento
+    cmp r10b, 'X'
+    jne no_invadieron_la_fortaleza
+    mov r10, [rbx+1] ;guardo un elemento
+    cmp r10b, 'X'
+    jne no_invadieron_la_fortaleza
+    mov r10, [rbx+2] ;guardo un elemento
+    cmp r10b, 'X'
+    jne no_invadieron_la_fortaleza
+;fila_6_fortaleza
+    mov r10, [rbx+9] ;guardo un elemento
+    cmp r10b, 'X'
+    jne no_invadieron_la_fortaleza
+    mov r10, [rbx+10] ;guardo un elemento
+    cmp r10b, 'X'
+    jne no_invadieron_la_fortaleza
+    mov r10, [rbx+11] ;guardo un elemento
+    cmp r10b, 'X'
+    jne no_invadieron_la_fortaleza
+;fila_7_fortaleza
+    mov r10, [rbx+18] ;guardo un elemento
+    cmp r10b, 'X'
+    jne no_invadieron_la_fortaleza
+    mov r10, [rbx+19] ;guardo un elemento
+    cmp r10b, 'X'
+    jne no_invadieron_la_fortaleza
+    mov r10, [rbx+20] ;guardo un elemento
+    cmp r10b, 'X'
+    jne no_invadieron_la_fortaleza
+
+    jmp ganaron_soldados_por_invasion
+    
+no_invadieron_la_fortaleza:
     ret
 
-    
-    
+ganaron_soldados_por_falta_oficiales:
+    mov rdi,msj_ganaron_soldados_por_falta_oficiales
+    sub rsp, 8
+    call printf
+    add rsp,8
+    jmp fin
+
+ganaron_soldados_por_invasion:
+    mov rdi,msj_ganaron_soldados_por_invasion
+    sub rsp, 8
+    call printf
+    add rsp,8
+    jmp fin
