@@ -44,14 +44,13 @@ section .data
     divisor db 2 
     
     matriz  db ' 1234567',0
-            db '1 |   | ',0
-            db '2_|   |_',0
-            db '3   X   ',0
-            db '4       ',0
-            db '5       ',0
-            db '6~|   |~',0
-            db '7 |   | ',0
-
+            db '1 |XXX| ',0
+            db '2_|XXX|_',0
+            db '3O XXXXX',0
+            db '4XXX XXX',0
+            db '5XXXX XX',0
+            db '6~|XXX|~',0
+            db '7 |XXX| ',0
 
 section .bss    
     buffer		resb	10
@@ -234,7 +233,7 @@ validar_movimiento_soldado_abajo:
     jmp prox_turno
     
 prox_turno:
-    ;call actualizar_turno
+    call actualizar_turno
     call actualizar_tablero
     call eliminar_oficial_desentendido
     call verificar_ganador
