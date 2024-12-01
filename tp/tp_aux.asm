@@ -32,8 +32,8 @@ section .data
     soldados    db 'soldados',0
     jugadorActual db 'soldados',0
     casilleroInvalido db 'casillero invalido!',10,0
-    msj_movimiento_oficial_invalido db 'movimiento_oficial_invalido! Vuelva a intentarlo',10,0
-    msj_movimiento_soldado_invalido db 'movimiento_soldado_invalido! Vuelva a intentarlo',10,0
+    msj_movimiento_oficial_invalido db 'movimiento de oficial invalido! Vuelva a intentarlo',10,0
+    msj_movimiento_soldado_invalido db 'movimiento de soldado invalido! Vuelva a intentarlo',10,0
 
     msj_ganaron_soldados_por_falta_oficiales db 'Ganaron los soldados, no hay mas oficiales que puedan defender la fortaleza!',10,0
     msj_ganaron_soldados_por_invasion db 'Ganaron los soldados, invadieron la fortaleza!',10,0
@@ -50,7 +50,7 @@ section .data
             db '4XX XXXX',0
             db '5XX X XX',0
             db '6~|  O|~',0
-            db '7~|O  |~',0
+            db '7~|   |~',0
             db '--------',0
 
 section .bss    
@@ -62,7 +62,7 @@ section .text
 main:
     mov rbp, rsp; for correct debugging
     sub rsp, 8
-    mov r14, 2 ;seteo cantidad de oficiales.
+    mov r14, 1 ;seteo cantidad de oficiales.
     call asignar_jugador_inicial
 ciclo_juego:
     call clear_screen
@@ -367,15 +367,20 @@ avanzar:
     ret
 
 clear_screen:
-
-    mov rdi, cmd_clear
+    mov rax, rsp
+    and rax, 15
+    je no_restar_rsp_3
     sub rsp, 8
+    mov rdi, cmd_clear
     call system
     add rsp, 8
     ret
+no_restar_rsp_3:
+    mov rdi, cmd_clear
+    call system
+    ret
     
 pedir_casillero_origen:
-    
     mov rax, rsp
     and rax, 15
     je no_restar_rsp_1
@@ -1019,6 +1024,8 @@ no_invadieron_la_fortaleza:
     ret
 
 ganaron_soldados_por_falta_oficiales:
+    call clear_screen
+    call mostrar_tablero
     mov rdi,msj_ganaron_soldados_por_falta_oficiales
     sub rsp, 8
     call printf
@@ -1026,6 +1033,8 @@ ganaron_soldados_por_falta_oficiales:
     jmp fin
 
 ganaron_soldados_por_invasion:
+    call clear_screen
+    call mostrar_tablero
     mov rdi,msj_ganaron_soldados_por_invasion
     sub rsp, 8
     call printf
