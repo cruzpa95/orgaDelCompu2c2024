@@ -81,12 +81,15 @@ fue_movimiento_oficial_valido:
     jne pedir_movimiento         ; Si no es 0 -> back to pedir_movimiento
     
 prox_turno:
-    call actualizar_tablero
+    jmp actualizar_tablero
+fin_actualizar_tablero:
     call actualizar_turno
-    call verificar_ganador
+fin_actualizar_turno:
+    jmp verificar_ganador
+fin_verificar_ganador:
     jmp ciclo_juego      ; Repite el bucle
         
-    fin:
+fin:
     mov rdi, endGame
     sub rsp, 8
     call printf
@@ -203,12 +206,15 @@ actualizar_tablero:
     ;aca deberia ir lo de borrar_oficial  solo si fue turno de oficiales!
     mov al, [turno]
     cmp al, 1 ; =1 -> estamos en turno de soldados
-    je avanzar
+    je fin_actualizar_tablero
+    ;si es turno oficiales chequear si deberia borrar oficial.
+    jmp validar_si_oficial_puede_comer_en_el_proximo_turno
+validar_desatendido:
     add r15, r13
     cmp r15, 1
     je borrar_oficial
-avanzar:
-    ret
+
+    jmp fin_actualizar_tablero
 
 clear_screen:
     mov rax, rsp
@@ -303,13 +309,13 @@ es_par:
     mov byte[turno], 0
     lea rax, [oficiales]          ; Cargar la dirección de 'soldados' en AX
     mov [jugadorActual], rax
-    ret
+    jmp fin_actualizar_turno
 
 es_impar:        
     mov byte[turno], 1
     lea rax, [soldados]          ; Cargar la dirección de 'soldados' en AX
     mov [jugadorActual], rax
-    ret
+    jmp fin_actualizar_turno
     
 asignar_jugador_inicial:
     lea rax, [soldados]          ; Cargar la dirección de 'soldados' en AX
@@ -697,7 +703,6 @@ no_restar_rsp:
 
 movimiento_soldado_valido:
     mov r15, 0 ;reseteo r15
-    call validar_si_oficial_puede_comer_en_el_proximo_turno
     jmp prox_turno
 
 validar_si_oficial_puede_comer_en_el_proximo_turno:
@@ -799,13 +804,13 @@ revisar_captura_arriba_derecha:
     cmp r10b, ' '
     je oficiales_pueden_comer
 
-;;;;;;;;aca termina lo bueno
-oficiales_pueden_comer:
-    mov r13, 1 ;se resetea siempre antes que jueguen oficiales
-    ret
 oficiales_no_pueden_comer:
     mov r13, 0 ;se resetea siempre antes que jueguen oficiales
-    ret
+    jmp validar_desatendido
+    
+oficiales_pueden_comer:
+    mov r13, 1 ;se resetea siempre antes que jueguen oficiales
+    jmp validar_desatendido
 
 verificar_ganador:
     cmp r14, 0
@@ -862,7 +867,7 @@ verificar_invasion:
     jmp ganaron_soldados_por_invasion
     
 no_invadieron_la_fortaleza:
-    ret
+    jmp fin_verificar_ganador
 
 ganaron_soldados_por_falta_oficiales:
     call clear_screen
