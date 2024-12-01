@@ -727,6 +727,7 @@ movimiento_soldado_valido:
 validar_si_oficial_debe_comer_prox_turno:
     ;encontrar oficial_1 (solo con el desplazamiento)
     sub rcx, rcx
+    sub rdx, rdx
     sub rax, rax
     sub rbx, rbx
     sub r10, r10
@@ -736,12 +737,17 @@ actualizo_indice:
     mov r10, [rbx] ;guardo el oficial_1
     cmp r10b, 'O'
     je revisar_si_oficial_puede_comer
+buscar_proximo_oficial:
+    cmp rdx, 2 ;si ya encontre a los 2.
+    je fin_actualizar_tablero
+
     inc rbx
     jmp actualizo_indice
 
 
 ;;;;;;;;aca viene lo bueno
 revisar_si_oficial_puede_comer:
+    inc rdx
     ;tengo en rbx la matriz en el indice del soldado.
 revisar_celda_derecha:
     mov r10, [rbx+1]; +1 = a la derecha de la posicion actual
@@ -825,7 +831,7 @@ revisar_captura_arriba_derecha:
 
 oficiales_no_pueden_comer:
     mov r13, 0 ;se resetea siempre antes que jueguen oficiales
-    jmp fin_actualizar_tablero
+    jmp buscar_proximo_oficial
     
 oficiales_pueden_comer:
     mov r13, 1 ;se resetea siempre antes que jueguen oficiales
@@ -890,16 +896,24 @@ no_invadieron_la_fortaleza:
 
 ganaron_soldados_por_falta_oficiales:
     call mostrar_tablero
-    mov rdi,msj_ganaron_soldados_por_falta_oficiales
+    mov rax, rsp
+    and rax, 15
+    je no_restar_rsp_fin_falta
     sub rsp, 8
+no_restar_rsp_fin_falta:
+    mov rdi,msj_ganaron_soldados_por_falta_oficiales
     call printf
     add rsp,8
     jmp fin
 
 ganaron_soldados_por_invasion:
     call mostrar_tablero
-    mov rdi,msj_ganaron_soldados_por_invasion
+    mov rax, rsp
+    and rax, 15
+    je no_restar_rsp_fin_invasion
     sub rsp, 8
+no_restar_rsp_fin_invasion:
+    mov rdi,msj_ganaron_soldados_por_invasion
     call printf
     add rsp,8
     jmp fin
