@@ -45,12 +45,12 @@ section .data
     
     matriz  db '~1234567',0
             db '1~|XXX|~',0
-            db '2~|XXX|~',0
-            db '3XXXXXXX',0
-            db '4XXXXXXX',0
-            db '5XX   XX',0
-            db '6~|  O|~',0
-            db '7~|O  |~',0
+            db '2~|   |~',0
+            db '3X     X',0
+            db '4X     X',0
+            db '5X     X',0
+            db '6~|   |~',0
+            db '7~|  O|~',0
             db '--------',0
 
 section .bss    
@@ -61,32 +61,188 @@ section .bss
 section .text
 main:
     mov rbp, rsp; for correct debugging
-    mov r14, 2 ;seteo cantidad de oficiales.
-    jmp asignar_jugador_inicial
+    sub rsp, 8
+    mov r14, 1 ;seteo cantidad de oficiales.
+    call asignar_jugador_inicial
 ciclo_juego:
     call clear_screen
     call mostrar_tablero
-    jmp mostrar_jugador_actual
+    call mostrar_jugador_actual
 pedir_movimiento:
-    jmp pedir_casillero_origen
+    call pedir_casillero_origen
 pedir_movimiento_destino:
-    jmp pedir_casillero_destino
-validar_movimiento:
+    call pedir_casillero_destino
+
     mov al, [turno]
     cmp al, 1
     je validar_movimiento_soldado
-    jmp validar_movimiento_oficial ;hacer esto solo si es el turno del oficial.
-fue_movimiento_oficial_valido:
+    call validar_movimiento_oficial ;hacer esto solo si es el turno del oficial.
     cmp r12, 0                  ; Si la validacion esta mal -> r12 != 0 -> volver a pedir origen-destin0
     jne pedir_movimiento         ; Si no es 0 -> back to pedir_movimiento
+    jmp prox_turno
+
+validar_movimiento_soldado:
+    mov rax,0
+    
+    mov al, [posx_fin]
+    mov ah, [posx_ini]
+    sub al, ah
+
+    cmp al, 0
+    je validar_movimiento_soldado_horizontal
+    cmp al,-1 
+    je validar_movimiento_soldado_arriba
+    cmp al, 1
+    je validar_movimiento_soldado_abajo
+    jmp movimiento_soldado_invalido
+    
+;fn terminada
+validar_movimiento_soldado_horizontal:
+    mov rax,0
+    mov al, [posx_ini]
+
+    cmp al, 7
+    je validar_movimiento_soldado_horizontal_fila_siete_seis
+    cmp al, 6
+    je validar_movimiento_soldado_horizontal_fila_siete_seis
+    cmp al, 5
+    je validar_movimiento_soldado_horizontal_fila_cinco
+
+    jmp movimiento_soldado_invalido
+
+;fn terminada
+validar_movimiento_soldado_horizontal_fila_siete_seis:
+    mov rdx,0
+    mov dl, [posy_ini]
+    mov dh, [posy_fin]
+
+    cmp dl, 3
+    je validar_movimiento_soldado_horizontal_columna_tres_cinco
+    cmp dl, 4
+    je validar_movimiento_soldado_horizontal_columna_cuatro
+    cmp dl, 5
+    je validar_movimiento_soldado_horizontal_columna_tres_cinco
+    jmp movimiento_soldado_invalido
+
+validar_movimiento_soldado_horizontal_columna_tres_cinco:
+    cmp dh, 4
+    je movimiento_soldado_valido
+    jmp movimiento_soldado_invalido
+
+validar_movimiento_soldado_horizontal_columna_cuatro:
+    cmp dh, 3
+    je movimiento_soldado_valido
+    cmp dh, 5
+    je movimiento_soldado_valido
+    jmp movimiento_soldado_invalido
+
+validar_movimiento_soldado_horizontal_fila_cinco:
+    mov rdx,0
+    mov dl, [posy_ini]
+    mov dh, [posy_fin]
+    
+    cmp dl, 3
+    jle movimiento_soldado_derecha
+    cmp dl, 4
+    je movimiento_soldado_derecha_izquierda
+    cmp dl, 7
+    jle movimiento_soldado_izquierda
+    jmp movimiento_soldado_invalido
+
+movimiento_soldado_derecha:
+    sub dh,dl
+    cmp dh, 1
+    je movimiento_soldado_valido
+    jmp movimiento_soldado_invalido
+
+movimiento_soldado_izquierda:
+    sub dh,dl
+    cmp dh,-1
+    je movimiento_soldado_valido
+    jmp movimiento_soldado_invalido
+
+movimiento_soldado_derecha_izquierda:
+    sub dh,dl
+    cmp dh,-1
+    je movimiento_soldado_valido
+    cmp dh, 1
+    je movimiento_soldado_valido
+    jmp movimiento_soldado_invalido
+
+;;fin validar movimientos horizontales
+validar_movimiento_soldado_arriba:
+    mov rax,0
+    mov al, [posx_ini]
+    
+    cmp al, 6
+    je validar_movimiento_soldado_arriba_en_fortaleza
+    cmp al, 7
+    je validar_movimiento_soldado_arriba_en_fortaleza
+    jmp movimiento_soldado_invalido
+
+validar_movimiento_soldado_arriba_en_fortaleza:
+    mov rdx,0
+    mov dl, [posy_ini]
+    mov dh, [posy_fin]
+
+    cmp dl, 3
+    je validar_movimiento_soldado_arriba_en_fortaleza_columna_tres
+    cmp dl, 4
+    je validar_movimiento_soldado_arriba_en_fortaleza_columna_cuatro
+    cmp dl, 5
+    je validar_movimiento_soldado_arriba_en_fortaleza_columna_cinco
+    jmp movimiento_soldado_invalido
+
+validar_movimiento_soldado_arriba_en_fortaleza_columna_tres:
+    cmp dh, 3
+    je movimiento_soldado_valido
+    cmp dh, 4
+    je movimiento_soldado_valido
+    jmp movimiento_soldado_invalido
+
+validar_movimiento_soldado_arriba_en_fortaleza_columna_cuatro:
+    cmp dh, 3
+    je movimiento_soldado_valido
+    cmp dh, 4
+    je movimiento_soldado_valido
+    cmp dh, 5
+    je movimiento_soldado_valido
+    jmp movimiento_soldado_invalido
+
+validar_movimiento_soldado_arriba_en_fortaleza_columna_cinco:
+    cmp dh, 4
+    je movimiento_soldado_valido
+    cmp dh, 5
+    je movimiento_soldado_valido
+    jmp movimiento_soldado_invalido
+
+validar_movimiento_soldado_abajo:
+    mov rdx,0
+    mov dl, [posy_ini]
+    mov dh, [posy_fin]
+    
+    sub dh, dl
+    cmp dh,-1
+    je movimiento_soldado_valido
+    cmp dh, 0
+    je movimiento_soldado_valido
+    cmp dh, 1
+    je movimiento_soldado_valido
+    jmp movimiento_soldado_invalido
+
+;;fin validar_movimiento_soldado
+    jmp prox_turno
     
 prox_turno:
     call actualizar_tablero
-    call actualizar_turno
+    ;call actualizar_turno
     call verificar_ganador
     jmp ciclo_juego      ; Repite el bucle
         
     fin:
+;    add rsp, 8             ; Restaura el espacio de la pila
+    ;call clear_screen
+
     mov rdi, endGame
     sub rsp, 8
     call printf
@@ -273,6 +429,7 @@ pedir_casillero_destino:
     sub rax, '0'                 ; Convertir de ASCII a valor numérico
     mov [posy_fin], al            ; Guardar el valor en 'posy_ini'
     jmp es_destino_valido
+    ret
     
 mostrar_jugador_actual:    
     sub rsp, 8
@@ -281,7 +438,7 @@ mostrar_jugador_actual:
  
     call printf
     add rsp, 8
-    jmp pedir_movimiento
+    ret
     
 actualizar_turno:
     mov al, [turno]
@@ -314,7 +471,7 @@ es_impar:
 asignar_jugador_inicial:
     lea rax, [soldados]          ; Cargar la dirección de 'soldados' en AX
     mov [jugadorActual], rax
-    jmp ciclo_juego
+    ret
     
 validar_casillero_origen:
     ;;valido que este dentro del tablero
@@ -357,6 +514,7 @@ dentro_tablero_origen_ok:
     cmp ah, 0         ; Compara el resto con 0
     je es_oficial_valido         ; Si el resto es 0, turno es par
     jmp es_soldado_valido ; Si no, turno es impar
+    ret
     
 es_soldado_valido:
 ;busco el elemento en la matriz; y lo guardo en r10 para comparar el elemento.
@@ -388,7 +546,7 @@ origen_invalido:
     add rsp, 8
     jmp pedir_casillero_origen
 turno_soldado_ok:
-    jmp pedir_movimiento_destino
+    ret
     
 es_oficial_valido:
 ;busco el elemento en la matriz; y lo guardo en r10 para comparar el elemento.
@@ -419,8 +577,8 @@ es_oficial_valido:
     call printf
     add rsp, 8
     jmp pedir_casillero_origen
-turno_oficial_ok:
-    jmp pedir_movimiento_destino    
+    turno_oficial_ok:
+    ret    
     
     
 es_destino_valido:
@@ -482,8 +640,9 @@ destino_invalido:
     add rsp, 8
     jmp pedir_casillero_destino
 destino_ok:
-    jmp validar_movimiento    
+    ret    
 validar_movimiento_oficial:
+;;falta resolver esto -> solo de a 1 en cualqeuir dir.
     mov r12,0
     mov rax,0
     mov al, [posx_ini]
@@ -640,7 +799,7 @@ movimiento_oficial_ok:
 ;    je borrar_oficial
     ;else termina turno oficiales
 termina_turno_oficiales:
-    jmp fue_movimiento_oficial_valido
+    ret
 borrar_oficial:
 ;voy a la posicion destino y borro el "O"
     sub rcx, rcx
@@ -682,7 +841,7 @@ movimiento_oficial_invalido:
     add rsp,8
     
     mov r12,1
-    jmp fue_movimiento_oficial_valido
+    ret
 
 movimiento_soldado_invalido:
     mov rax, rsp
@@ -881,157 +1040,3 @@ ganaron_soldados_por_invasion:
     call printf
     add rsp,8
     jmp fin
-
-
-
-validar_movimiento_soldado:
-    mov rax,0
-    
-    mov al, [posx_fin]
-    mov ah, [posx_ini]
-    sub al, ah
-
-    cmp al, 0
-    je validar_movimiento_soldado_horizontal
-    cmp al,-1 
-    je validar_movimiento_soldado_arriba
-    cmp al, 1
-    je validar_movimiento_soldado_abajo
-    jmp movimiento_soldado_invalido
-    
-;fn terminada
-validar_movimiento_soldado_horizontal:
-    mov rax,0
-    mov al, [posx_ini]
-
-    cmp al, 7
-    je validar_movimiento_soldado_horizontal_fila_siete_seis
-    cmp al, 6
-    je validar_movimiento_soldado_horizontal_fila_siete_seis
-    cmp al, 5
-    je validar_movimiento_soldado_horizontal_fila_cinco
-
-    jmp movimiento_soldado_invalido
-
-;fn terminada
-validar_movimiento_soldado_horizontal_fila_siete_seis:
-    mov rdx,0
-    mov dl, [posy_ini]
-    mov dh, [posy_fin]
-
-    cmp dl, 3
-    je validar_movimiento_soldado_horizontal_columna_tres_cinco
-    cmp dl, 4
-    je validar_movimiento_soldado_horizontal_columna_cuatro
-    cmp dl, 5
-    je validar_movimiento_soldado_horizontal_columna_tres_cinco
-    jmp movimiento_soldado_invalido
-
-validar_movimiento_soldado_horizontal_columna_tres_cinco:
-    cmp dh, 4
-    je movimiento_soldado_valido
-    jmp movimiento_soldado_invalido
-
-validar_movimiento_soldado_horizontal_columna_cuatro:
-    cmp dh, 3
-    je movimiento_soldado_valido
-    cmp dh, 5
-    je movimiento_soldado_valido
-    jmp movimiento_soldado_invalido
-
-validar_movimiento_soldado_horizontal_fila_cinco:
-    mov rdx,0
-    mov dl, [posy_ini]
-    mov dh, [posy_fin]
-    
-    cmp dl, 3
-    jle movimiento_soldado_derecha
-    cmp dl, 4
-    je movimiento_soldado_derecha_izquierda
-    cmp dl, 7
-    jle movimiento_soldado_izquierda
-    jmp movimiento_soldado_invalido
-
-movimiento_soldado_derecha:
-    sub dh,dl
-    cmp dh, 1
-    je movimiento_soldado_valido
-    jmp movimiento_soldado_invalido
-
-movimiento_soldado_izquierda:
-    sub dh,dl
-    cmp dh,-1
-    je movimiento_soldado_valido
-    jmp movimiento_soldado_invalido
-
-movimiento_soldado_derecha_izquierda:
-    sub dh,dl
-    cmp dh,-1
-    je movimiento_soldado_valido
-    cmp dh, 1
-    je movimiento_soldado_valido
-    jmp movimiento_soldado_invalido
-
-;;fin validar movimientos horizontales
-validar_movimiento_soldado_arriba:
-    mov rax,0
-    mov al, [posx_ini]
-    
-    cmp al, 6
-    je validar_movimiento_soldado_arriba_en_fortaleza
-    cmp al, 7
-    je validar_movimiento_soldado_arriba_en_fortaleza
-    jmp movimiento_soldado_invalido
-
-validar_movimiento_soldado_arriba_en_fortaleza:
-    mov rdx,0
-    mov dl, [posy_ini]
-    mov dh, [posy_fin]
-
-    cmp dl, 3
-    je validar_movimiento_soldado_arriba_en_fortaleza_columna_tres
-    cmp dl, 4
-    je validar_movimiento_soldado_arriba_en_fortaleza_columna_cuatro
-    cmp dl, 5
-    je validar_movimiento_soldado_arriba_en_fortaleza_columna_cinco
-    jmp movimiento_soldado_invalido
-
-validar_movimiento_soldado_arriba_en_fortaleza_columna_tres:
-    cmp dh, 3
-    je movimiento_soldado_valido
-    cmp dh, 4
-    je movimiento_soldado_valido
-    jmp movimiento_soldado_invalido
-
-validar_movimiento_soldado_arriba_en_fortaleza_columna_cuatro:
-    cmp dh, 3
-    je movimiento_soldado_valido
-    cmp dh, 4
-    je movimiento_soldado_valido
-    cmp dh, 5
-    je movimiento_soldado_valido
-    jmp movimiento_soldado_invalido
-
-validar_movimiento_soldado_arriba_en_fortaleza_columna_cinco:
-    cmp dh, 4
-    je movimiento_soldado_valido
-    cmp dh, 5
-    je movimiento_soldado_valido
-    jmp movimiento_soldado_invalido
-
-validar_movimiento_soldado_abajo:
-    mov rdx,0
-    mov dl, [posy_ini]
-    mov dh, [posy_fin]
-    
-    sub dh, dl
-    cmp dh,-1
-    je movimiento_soldado_valido
-    cmp dh, 0
-    je movimiento_soldado_valido
-    cmp dh, 1
-    je movimiento_soldado_valido
-    jmp movimiento_soldado_invalido
-
-;;fin validar_movimiento_soldado
-    jmp prox_turno
