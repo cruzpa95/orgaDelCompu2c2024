@@ -1,21 +1,118 @@
 para probar movimientos de soldados, comentar esta linea: call actualizar_turno
 
 movimientos de soldado que fallan:
--fila 6 a fila 5 rompe (no deberia)
--75 a 65 rompe (no deb)
+verificar que si agarro un soldado que no puede ir a ningun lado como hago para seleccionar otro.
 
 ; call revision_oficial_desentendido
 revision_oficial_desentendido:
-;r11 r13 r15 -> voy a usar 
-    ;antes de terminar un turno seteo r11 en 0, y ademas tengo que revisar si alguno puede comer.
+;r13: 1 si pueden comer, 0 si no pueden comer.
+;r15: 1 si comio en el turno, 0 si no comio.
+
+r15, r13
+0   0       ok
+0   1       eliminar
+1   0       no deberia pasar nunca
+1   1       ok
+
+    ;antes de terminar un turno soldado seteo r15 en 0, y luego tengo que revisar si algun oficial puede comer.
         ;si alguno puede comer, guardo en r13 un 1. -> COMO??
         ;si ninguno puede comer, guardo en r13 un 0.
     ;luego del movimiento_oficial
-        ;si comio, guardo 1 en r11 (movimiento doble) -> esta ok y no hay desentendimiento.
-        ;si no comio, hay un 0 en r11 (movimiento simple) -> chequear r13
+        ;si comio, guardo 1 en r15 (movimiento doble) -> esta ok y no hay desentendimiento.
+        ;si no comio, hay un 0 en r15 (movimiento simple) -> chequear r13
             ;si r13 = 1 -> borramos al oficial (del destino donde cayo)
 
 eliminar_oficial:
     ;actualizar matriz
     ;dec r14
     ret
+
+
+; revisar si al final de cada turno resetea r15 y r13
+; 
+
+
+
+
+
+
+
+jmp pedir_casillero_origen
+debe terminar en:
+jmp pedir_movimiento_destino
+
+
+jmp pedir_casillero_destino 
+debe terminar en:
+jmp validar_movimiento
+
+
+
+
+jmp validar_movimiento_oficial
+debe terminar en:
+jmp fue_movimiento_oficial_valido
+
+
+
+
+
+
+
+
+######
+
+mostrar_tablero: recorre matriz e imprime NADA MAS.
+
+pedir_movimiento:
+    pedir_origen_destino
+
+validar_movimiento_oficial
+    movimiento_oficial_ok ; deja un espacio en blanco donde estaba el oficial
+    jmp fue_movimiento_oficial_valido
+    jmp pedir_movimiento
+        si no es valido -> pedir_movimiento
+
+
+
+
+
+jmp validar_desatendido
+tiene que terminar en 
+jmp fin_actualizar_tablero
+
+
+OK:
+    borrar_oficial
+    debe terminar en 
+    fin_validar_desatendido
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+supongamos que guardo xy de los oficiales.

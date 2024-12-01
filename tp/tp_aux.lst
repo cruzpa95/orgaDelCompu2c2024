@@ -100,1012 +100,1009 @@
     62                                  main:
     63 00000000 4889E5                      mov rbp, rsp; for correct debugging
     64 00000003 41BE02000000                mov r14, 2 ;seteo cantidad de oficiales.
-    65 00000009 E90F030000                  jmp asignar_jugador_inicial
+    65 00000009 E914030000                  jmp asignar_jugador_inicial
     66                                  ciclo_juego:
-    67 0000000E E88B010000                  call clear_screen
-    68 00000013 E858000000                  call mostrar_tablero
-    69 00000018 E977020000                  jmp mostrar_jugador_actual
-    70                                  pedir_movimiento:
-    71 0000001D E9AD010000                  jmp pedir_casillero_origen
-    72                                  pedir_movimiento_destino:
-    73 00000022 E912020000                  jmp pedir_casillero_destino
-    74                                  validar_movimiento:
-    75 00000027 8A0425[B8010000]            mov al, [turno]
-    76 0000002E 3C01                        cmp al, 1
-    77 00000030 0F8496080000                je validar_movimiento_soldado
-    78 00000036 E9C6040000                  jmp validar_movimiento_oficial ;hacer esto solo si es el turno del oficial.
-    79                                  fue_movimiento_oficial_valido:
-    80 0000003B 4983FC00                    cmp r12, 0                  ; Si la validacion esta mal -> r12 != 0 -> volver a pedir origen-destin0
-    81 0000003F 75DC                        jne pedir_movimiento         ; Si no es 0 -> back to pedir_movimiento
-    82                                      
-    83                                  prox_turno:
-    84 00000041 E99B000000                  jmp actualizar_tablero
-    85                                  fin_actualizar_tablero:
-    86 00000046 E96D020000                  jmp actualizar_turno
-    87                                  fin_actualizar_turno:
-    88 0000004B E991070000                  jmp verificar_ganador
-    89                                  fin_verificar_ganador:
-    90 00000050 EBBC                        jmp ciclo_juego      ; Repite el bucle
-    91                                          
-    92                                  fin:
-    93 00000052 48BF-                       mov rdi, endGame
-    93 00000054 [A801000000000000] 
-    94 0000005C 4883EC08                    sub rsp, 8
-    95 00000060 E8(00000000)                call printf
-    96 00000065 4883C408                    add rsp,8
-    97                                  
-    98 00000069 B44C                        mov ah, 4Ch    ; Código de función para terminar el programa;    mov al, 0      ; Código de retorno (0 indica éxito)
-    99 0000006B B000                        mov al, 0      ; Código de retorno (0 indica éxito)
-   100 0000006D CD21                        int 21h        ; Llamada a la interrupción 21h
-   101                                  
-   102 0000006F C3                          ret
-   103                                  
-   104                                  mostrar_tablero:
-   105 00000070 B800000000                  mov rax, 0
-   106 00000075 48890425[2F000000]          mov [posicion], rax 
-   107 0000007D B908000000                  mov rcx, cantidadColumnas
-   108 00000082 4883EC08                    sub rsp, 8
-   109                                      fila_loop:
-   110 00000086 51                              push rcx ;es necesario para loop, sino el registro rcx se pisa y loopea infinito
-   111                                          ; Carga la dirección de la fila actual en la matriz
-   112                                  
-   113                                          ; Imprime la fila actual
-   114                                  
-   115 00000087 48BF-                           mov rdi, matriz         ; Pasa la dirección de la fila a printf
-   115 00000089 [BA01000000000000] 
-   116 00000091 48033C25[2F000000]              add rdi, [posicion]
-   117 00000099 4829C0                          sub rax, rax           ; Limpia rax para printf
-   118                                          
-   119                                          
-   120 0000009C E8(00000000)                    call printf
-   121                                          ; Imprime salto de línea después de cada fila
-   122 000000A1 48BF-                           mov rdi, saltoLinea
-   122 000000A3 [2D00000000000000] 
-   123 000000AB 4831C0                          xor rax, rax           ; Limpia rax para printf
-   124 000000AE E8(00000000)                    call printf
-   125 000000B3 59                              pop rcx ;es necesario para loop, sino el registro rcx se pisa y loopea infinito
-   126                                          
-   127                                          ; Sumar 10 a "posicion"
-   128 000000B4 488B0425[2F000000]              mov rax, [posicion]         ; Carga el valor de "posicion" en rax
-   129 000000BC 4883C009                        add rax, cantidadFilas                 ; Suma 10 a rax
-   130 000000C0 48890425[2F000000]              mov [posicion], rax         ; Guarda el nuevo valor en "posicion"
+    67 0000000E E85D000000                  call mostrar_tablero
+    68 00000013 E981020000                  jmp mostrar_jugador_actual
+    69                                  pedir_movimiento:
+    70 00000018 E9B7010000                  jmp pedir_casillero_origen
+    71                                  pedir_movimiento_destino:
+    72 0000001D E91C020000                  jmp pedir_casillero_destino
+    73                                  validar_movimiento:
+    74 00000022 8A0425[B8010000]            mov al, [turno]
+    75 00000029 3C01                        cmp al, 1
+    76 0000002B 0F8499080000                je validar_movimiento_soldado
+    77 00000031 E9D0040000                  jmp validar_movimiento_oficial ;hacer esto solo si es el turno del oficial.
+    78                                  fin_validacion_movimiento_oficial:
+    79 00000036 4983FC00                    cmp r12, 0                  ; Si la validacion esta mal -> r12 != 0 -> volver a pedir origen-destin0
+    80 0000003A 75DC                        jne pedir_movimiento         ; Si no es 0 -> back to pedir_movimiento
+    81 0000003C E97C010000                  jmp validar_desatendido
+    82                                  prox_turno:
+    83 00000041 E9CC000000                  jmp actualizar_tablero
+    84                                  fin_actualizar_tablero:
+    85 00000046 E972020000                  jmp actualizar_turno
+    86                                  fin_actualizar_turno:
+    87 0000004B E999070000                  jmp verificar_ganador
+    88                                  fin_verificar_ganador:
+    89 00000050 EBBC                        jmp ciclo_juego      ; Repite el bucle
+    90                                          
+    91                                  fin:
+    92 00000052 48BF-                       mov rdi, endGame
+    92 00000054 [A801000000000000] 
+    93 0000005C 4883EC08                    sub rsp, 8
+    94 00000060 E8(00000000)                call printf
+    95 00000065 4883C408                    add rsp,8
+    96                                  
+    97 00000069 B44C                        mov ah, 4Ch    ; Código de función para terminar el programa;    mov al, 0      ; Código de retorno (0 indica éxito)
+    98 0000006B B000                        mov al, 0      ; Código de retorno (0 indica éxito)
+    99 0000006D CD21                        int 21h        ; Llamada a la interrupción 21h
+   100                                  
+   101 0000006F C3                          ret
+   102                                  
+   103                                  mostrar_tablero:
+   104                                  
+   105                                  ;clear_screen:
+   106 00000070 4889E0                      mov rax, rsp
+   107 00000073 4883E00F                    and rax, 15
+   108 00000077 7419                        je no_restar_rsp_3
+   109 00000079 4883EC08                    sub rsp, 8
+   110 0000007D 48BF-                       mov rdi, cmd_clear
+   110 0000007F [4100000000000000] 
+   111 00000087 E8(00000000)                call system
+   112 0000008C 4883C408                    add rsp, 8
+   113 00000090 EB0F                        jmp saltar_a_mostrar_tablero
+   114                                  no_restar_rsp_3:
+   115 00000092 48BF-                       mov rdi, cmd_clear
+   115 00000094 [4100000000000000] 
+   116 0000009C E8(00000000)                call system
+   117                                  saltar_a_mostrar_tablero:
+   118 000000A1 B800000000                  mov rax, 0
+   119 000000A6 48890425[2F000000]          mov [posicion], rax 
+   120 000000AE B908000000                  mov rcx, cantidadColumnas
+   121 000000B3 4883EC08                    sub rsp, 8
+   122                                      fila_loop:
+   123 000000B7 51                              push rcx ;es necesario para loop, sino el registro rcx se pisa y loopea infinito
+   124                                          ; Carga la dirección de la fila actual en la matriz
+   125                                  
+   126                                          ; Imprime la fila actual
+   127                                  
+   128 000000B8 48BF-                           mov rdi, matriz         ; Pasa la dirección de la fila a printf
+   128 000000BA [BA01000000000000] 
+   129 000000C2 48033C25[2F000000]              add rdi, [posicion]
+   130 000000CA 4829C0                          sub rax, rax           ; Limpia rax para printf
    131                                          
-   132 000000C8 E2BC                            loop fila_loop
-   133                                          
-   134 000000CA 48BF-                           mov rdi, saltoLinea
-   134 000000CC [2D00000000000000] 
-   135 000000D4 4831C0                          xor rax, rax           ; Limpia rax para printf
-   136 000000D7 E8(00000000)                    call printf
-   137 000000DC 4883C408                        add rsp, 8
-   138 000000E0 C3                              ret
-   139                                  
-   140                                  actualizar_tablero:
-   141                                      ;Posicionamiento en el elemento i,j de una matriz
-   142                                      ;(i-1)*longitudFila + (j-1)*longitudElemento
-   143                                      ;longitdFila= longitudElemento*cantidadColumnas
-   144 000000E1 4829C9                      sub rcx, rcx
-   145 000000E4 4829C0                      sub rax, rax
-   146 000000E7 4829DB                      sub rbx, rbx
-   147 000000EA 4D29D2                      sub r10, r10
-   148 000000ED 8A0425[34000000]            mov al,[posx_ini] ;guardo el valor de la fila, en AL(8bits) 
-   149                                                      ;ya que posx es db (byte= 8bits) sino guarda cualquier cosa
-   150                                  ;    sub rax,1 -> no es necesaria la resta ya que la matriz empieza en 1,1
-   151 000000F4 41B809000000                mov r8, cantidadFilas
-   152 000000FA 49F7E8                      imul r8   ;me desplazo en la fila
-   153 000000FD 4801C1                      add rcx,rax
-   154                                      
-   155 00000100 8A0425[35000000]            mov al,[posy_ini] ;guardo el valor de la col,
-   156                                  ;    sub rax,1
-   157 00000107 41B801000000                mov r8, longitudElemento ;guardo en r8 para darle longitud y poder multiplicar usando imul
-   158 0000010D 49F7E8                      imul r8 ;me desplazo en la columna
-   159 00000110 4801C1                      add rcx,rax ;sumo los desplazamientos
-   160                                      
-   161                                      
-   162 00000113 48BB-                       mov rbx,matriz ;pongo el pto al inicio de la matriz
-   162 00000115 [BA01000000000000] 
-   163 0000011D 4801CB                      add rbx,rcx ;me posicione en la matriz
-   164                                  
-   165 00000120 4C8B13                      mov r10, [rbx] ;guardo un elemento
-   166 00000123 4C8B4B01                    mov r9, [rbx+1] ;guardo en r9 lo que le sigue de matriz posterior al elemento a actualizar
-   167 00000127 41B820000000                mov r8, " " ; lo muevo a un reg para darle (y estar seguro de su) longitud
-   168 0000012D 4C8903                      mov [rbx],r8 ;muevo el valor(de igual longitud). muevo a la posicion de la matriz a actualizar
-   169                                      
-   170                                      ;despues de agregar el nuevo valor, agregarle el resto de la matriz que estaba antes.
-   171 00000130 4C894B01                    mov [rbx+1],r9
-   172                                      
+   132                                          
+   133 000000CD E8(00000000)                    call printf
+   134                                          ; Imprime salto de línea después de cada fila
+   135 000000D2 48BF-                           mov rdi, saltoLinea
+   135 000000D4 [2D00000000000000] 
+   136 000000DC 4831C0                          xor rax, rax           ; Limpia rax para printf
+   137 000000DF E8(00000000)                    call printf
+   138 000000E4 59                              pop rcx ;es necesario para loop, sino el registro rcx se pisa y loopea infinito
+   139                                          
+   140                                          ; Sumar 10 a "posicion"
+   141 000000E5 488B0425[2F000000]              mov rax, [posicion]         ; Carga el valor de "posicion" en rax
+   142 000000ED 4883C009                        add rax, cantidadFilas                 ; Suma 10 a rax
+   143 000000F1 48890425[2F000000]              mov [posicion], rax         ; Guarda el nuevo valor en "posicion"
+   144                                          
+   145 000000F9 E2BC                            loop fila_loop
+   146                                          
+   147 000000FB 48BF-                           mov rdi, saltoLinea
+   147 000000FD [2D00000000000000] 
+   148 00000105 4831C0                          xor rax, rax           ; Limpia rax para printf
+   149 00000108 E8(00000000)                    call printf
+   150 0000010D 4883C408                        add rsp, 8
+   151 00000111 C3                              ret
+   152                                  
+   153                                  actualizar_tablero:
+   154                                      ;Posicionamiento en el elemento i,j de una matriz
+   155                                      ;(i-1)*longitudFila + (j-1)*longitudElemento
+   156                                      ;longitdFila= longitudElemento*cantidadColumnas
+   157 00000112 4829C9                      sub rcx, rcx
+   158 00000115 4829C0                      sub rax, rax
+   159 00000118 4829DB                      sub rbx, rbx
+   160 0000011B 4D29D2                      sub r10, r10
+   161 0000011E 8A0425[34000000]            mov al,[posx_ini] ;guardo el valor de la fila, en AL(8bits) 
+   162                                                      ;ya que posx es db (byte= 8bits) sino guarda cualquier cosa
+   163                                  ;    sub rax,1 -> no es necesaria la resta ya que la matriz empieza en 1,1
+   164 00000125 41B809000000                mov r8, cantidadFilas
+   165 0000012B 49F7E8                      imul r8   ;me desplazo en la fila
+   166 0000012E 4801C1                      add rcx,rax
+   167                                      
+   168 00000131 8A0425[35000000]            mov al,[posy_ini] ;guardo el valor de la col,
+   169                                  ;    sub rax,1
+   170 00000138 41B801000000                mov r8, longitudElemento ;guardo en r8 para darle longitud y poder multiplicar usando imul
+   171 0000013E 49F7E8                      imul r8 ;me desplazo en la columna
+   172 00000141 4801C1                      add rcx,rax ;sumo los desplazamientos
    173                                      
-   174                                      ;;repito con casillero_destino
-   175                                      ;;y guardo en el destino lo que guarde en r10 (el elemento origen)
-   176                                      
-   177                                      
-   178                                      ;Posicionamiento en el elemento i,j de una matriz
-   179                                      ;(i-1)*longitudFila + (j-1)*longitudElemento
-   180                                      ;longitdFila= longitudElemento*cantidadColumnas
-   181 00000134 4829C9                      sub rcx, rcx
-   182 00000137 8A0425[36000000]            mov al,[posx_fin] ;guardo el valor de la fila, en AL(8bits) 
-   183                                                      ;ya que posx es db (byte= 8bits) sino guarda cualquier cosa
-   184                                  ;    sub rax,1 -> no es necesaria la resta ya que la matriz empieza en 1,1
-   185 0000013E 41B809000000                mov r8, cantidadFilas
-   186 00000144 49F7E8                      imul r8   ;me desplazo en la fila
-   187 00000147 4801C1                      add rcx,rax
-   188                                      
-   189 0000014A 8A0425[37000000]            mov al,[posy_fin] ;guardo el valor de la col,
-   190                                  ;    sub rax,1
-   191 00000151 41B801000000                mov r8, longitudElemento ;guardo en r8 para darle longitud y poder multiplicar usando imul
-   192 00000157 49F7E8                      imul r8 ;me desplazo en la columna
-   193 0000015A 4801C1                      add rcx,rax ;sumo los desplazamientos
-   194                                      
-   195                                      
-   196 0000015D 48BB-                       mov rbx,matriz ;pongo el pto al inicio de la matriz
-   196 0000015F [BA01000000000000] 
-   197 00000167 4801CB                      add rbx,rcx ;me posicione en la matriz
-   198                                  
-   199 0000016A 4C8B4B01                    mov r9, [rbx+1] ;guardo en r9 lo que le sigue de matriz posterior al elemento a actualizar
-   200 0000016E 4D89D0                      mov r8, r10 ; lo muevo a un reg para darle (y estar seguro de su) longitud
-   201 00000171 4C8903                      mov [rbx],r8 ;muevo el valor(de igual longitud). muevo a la posicion de la matriz a actualizar
-   202                                      
-   203                                      ;despues de agregar el nuevo valor, agregarle el resto de la matriz que estaba antes.
-   204 00000174 4C894B01                    mov [rbx+1],r9
-   205                                  
-   206                                      ;aca deberia ir lo de borrar_oficial  solo si fue turno de oficiales!
-   207 00000178 8A0425[B8010000]            mov al, [turno]
-   208 0000017F 3C01                        cmp al, 1 ; =1 -> estamos en turno de soldados
-   209 00000181 0F84BFFEFFFF                je fin_actualizar_tablero
-   210                                      ;si es turno oficiales chequear si deberia borrar oficial.
-   211 00000187 E963050000                  jmp validar_si_oficial_puede_comer_en_el_proximo_turno
-   212                                  validar_desatendido:
-   213 0000018C 4D01EF                      add r15, r13
-   214 0000018F 4983FF01                    cmp r15, 1
-   215 00000193 0F84AC040000                je borrar_oficial
-   216                                  
-   217 00000199 E9A8FEFFFF                  jmp fin_actualizar_tablero
+   174                                      
+   175 00000144 48BB-                       mov rbx,matriz ;pongo el pto al inicio de la matriz
+   175 00000146 [BA01000000000000] 
+   176 0000014E 4801CB                      add rbx,rcx ;me posicione en la matriz
+   177                                  
+   178 00000151 4C8B13                      mov r10, [rbx] ;guardo un elemento
+   179 00000154 4C8B4B01                    mov r9, [rbx+1] ;guardo en r9 lo que le sigue de matriz posterior al elemento a actualizar
+   180 00000158 41B820000000                mov r8, " " ; lo muevo a un reg para darle (y estar seguro de su) longitud
+   181 0000015E 4C8903                      mov [rbx],r8 ;muevo el valor(de igual longitud). muevo a la posicion de la matriz a actualizar
+   182                                      
+   183                                      ;despues de agregar el nuevo valor, agregarle el resto de la matriz que estaba antes.
+   184 00000161 4C894B01                    mov [rbx+1],r9
+   185                                      
+   186                                      
+   187                                      ;;repito con casillero_destino
+   188                                      ;;y guardo en el destino lo que guarde en r10 (el elemento origen)
+   189                                      
+   190                                      
+   191                                      ;Posicionamiento en el elemento i,j de una matriz
+   192                                      ;(i-1)*longitudFila + (j-1)*longitudElemento
+   193                                      ;longitdFila= longitudElemento*cantidadColumnas
+   194 00000165 4829C9                      sub rcx, rcx
+   195 00000168 8A0425[36000000]            mov al,[posx_fin] ;guardo el valor de la fila, en AL(8bits) 
+   196                                                      ;ya que posx es db (byte= 8bits) sino guarda cualquier cosa
+   197                                  ;    sub rax,1 -> no es necesaria la resta ya que la matriz empieza en 1,1
+   198 0000016F 41B809000000                mov r8, cantidadFilas
+   199 00000175 49F7E8                      imul r8   ;me desplazo en la fila
+   200 00000178 4801C1                      add rcx,rax
+   201                                      
+   202 0000017B 8A0425[37000000]            mov al,[posy_fin] ;guardo el valor de la col,
+   203                                  ;    sub rax,1
+   204 00000182 41B801000000                mov r8, longitudElemento ;guardo en r8 para darle longitud y poder multiplicar usando imul
+   205 00000188 49F7E8                      imul r8 ;me desplazo en la columna
+   206 0000018B 4801C1                      add rcx,rax ;sumo los desplazamientos
+   207                                      
+   208                                      
+   209 0000018E 48BB-                       mov rbx,matriz ;pongo el pto al inicio de la matriz
+   209 00000190 [BA01000000000000] 
+   210 00000198 4801CB                      add rbx,rcx ;me posicione en la matriz
+   211                                  
+   212 0000019B 4C8B4B01                    mov r9, [rbx+1] ;guardo en r9 lo que le sigue de matriz posterior al elemento a actualizar
+   213 0000019F 4D89D0                      mov r8, r10 ; lo muevo a un reg para darle (y estar seguro de su) longitud
+   214 000001A2 4C8903                      mov [rbx],r8 ;muevo el valor(de igual longitud). muevo a la posicion de la matriz a actualizar
+   215                                      
+   216                                      ;despues de agregar el nuevo valor, agregarle el resto de la matriz que estaba antes.
+   217 000001A5 4C894B01                    mov [rbx+1],r9
    218                                  
-   219                                  clear_screen:
-   220 0000019E 4889E0                      mov rax, rsp
-   221 000001A1 4883E00F                    and rax, 15
-   222 000001A5 7418                        je no_restar_rsp_3
-   223 000001A7 4883EC08                    sub rsp, 8
-   224 000001AB 48BF-                       mov rdi, cmd_clear
-   224 000001AD [4100000000000000] 
-   225 000001B5 E8(00000000)                call system
-   226 000001BA 4883C408                    add rsp, 8
-   227 000001BE C3                          ret
-   228                                  no_restar_rsp_3:
-   229 000001BF 48BF-                       mov rdi, cmd_clear
-   229 000001C1 [4100000000000000] 
-   230 000001C9 E8(00000000)                call system
-   231 000001CE C3                          ret
-   232                                      
-   233                                  pedir_casillero_origen:
-   234 000001CF 4889E0                      mov rax, rsp
-   235 000001D2 4883E00F                    and rax, 15
-   236 000001D6 7404                        je no_restar_rsp_1
-   237 000001D8 4883EC08                    sub rsp, 8
-   238                                  no_restar_rsp_1:
-   239 000001DC 48BF-                       mov rdi, msjIngFilaColumnaOrigen
-   239 000001DE [0000000000000000] 
-   240 000001E6 E8(00000000)                call printf
-   241                                  
-   242 000001EB 48BF-                       mov rdi, cadena      ; Dirección de 'cadena'
-   242 000001ED [0A00000000000000] 
-   243 000001F5 E8(00000000)                call gets
-   244 000001FA 4883C408                    add rsp, 8
-   245                                  
-   246                                      ; Extraer el primer carácter (primer número)
-   247 000001FE 480FB60425-                 movzx rax, byte [cadena]     ; Cargar el primer carácter de 'cadena' en rax
-   247 00000203 [0A000000]         
-   248 00000207 4883E830                    sub rax, '0'                 ; Convertir de ASCII a valor numérico
-   249 0000020B 880425[34000000]            mov [posx_ini], al            ; Guardar el valor en 'posx_ini'
-   250                                      
-   251 00000212 803C25[34000000]00          cmp byte [posx_ini], 0
-   252 0000021A 0F8432FEFFFF                je fin               ; Si es 0, salta a "fin de juego"
-   253                                      
-   254                                      ; Extraer el segundo carácter (segundo número)
-   255 00000220 480FB60425-                 movzx rax, byte [cadena + 1] ; Cargar el segundo carácter de 'cadena' en rax
-   255 00000225 [0B000000]         
-   256 00000229 4883E830                    sub rax, '0'                 ; Convertir de ASCII a valor numérico
-   257 0000022D 880425[35000000]            mov [posy_ini], al            ; Guardar el valor en 'posy_ini'
-   258                                      
-   259 00000234 E9F9000000                  jmp validar_casillero_origen
+   219                                      ;aca deberia ir lo de borrar_oficial  solo si fue turno de oficiales!
+   220 000001A9 8A0425[B8010000]            mov al, [turno]
+   221 000001B0 3C01                        cmp al, 1 ; =1 -> estamos en turno de soldados
+   222                                      ;je fin_actualizar_tablero
+   223 000001B2 0F843F050000                je validar_si_oficial_debe_comer_prox_turno ;esto deja en r13 si pueden comer.
+   224                                      ;si es turno oficiales chequear si deberia borrar oficial.
+   225 000001B8 E989FEFFFF                  jmp fin_actualizar_tablero
+   226                                  
+   227                                  validar_desatendido:
+   228 000001BD 4D01EF                      add r15, r13
+   229 000001C0 4983FF01                    cmp r15, 1
+   230 000001C4 0F8480040000                je borrar_oficial
+   231 000001CA E943FFFFFF                  jmp actualizar_tablero
+   232                                  fin_validar_desatendido:
+   233 000001CF E972FEFFFF                  jmp fin_actualizar_tablero
+   234                                      
+   235                                  pedir_casillero_origen:
+   236 000001D4 4889E0                      mov rax, rsp
+   237 000001D7 4883E00F                    and rax, 15
+   238 000001DB 7404                        je no_restar_rsp_1
+   239 000001DD 4883EC08                    sub rsp, 8
+   240                                  no_restar_rsp_1:
+   241 000001E1 48BF-                       mov rdi, msjIngFilaColumnaOrigen
+   241 000001E3 [0000000000000000] 
+   242 000001EB E8(00000000)                call printf
+   243                                  
+   244 000001F0 48BF-                       mov rdi, cadena      ; Dirección de 'cadena'
+   244 000001F2 [0A00000000000000] 
+   245 000001FA E8(00000000)                call gets
+   246 000001FF 4883C408                    add rsp, 8
+   247                                  
+   248                                      ; Extraer el primer carácter (primer número)
+   249 00000203 480FB60425-                 movzx rax, byte [cadena]     ; Cargar el primer carácter de 'cadena' en rax
+   249 00000208 [0A000000]         
+   250 0000020C 4883E830                    sub rax, '0'                 ; Convertir de ASCII a valor numérico
+   251 00000210 880425[34000000]            mov [posx_ini], al            ; Guardar el valor en 'posx_ini'
+   252                                      
+   253 00000217 803C25[34000000]00          cmp byte [posx_ini], 0
+   254 0000021F 0F842DFEFFFF                je fin               ; Si es 0, salta a "fin de juego"
+   255                                      
+   256                                      ; Extraer el segundo carácter (segundo número)
+   257 00000225 480FB60425-                 movzx rax, byte [cadena + 1] ; Cargar el segundo carácter de 'cadena' en rax
+   257 0000022A [0B000000]         
+   258 0000022E 4883E830                    sub rax, '0'                 ; Convertir de ASCII a valor numérico
+   259 00000232 880425[35000000]            mov [posy_ini], al            ; Guardar el valor en 'posy_ini'
    260                                      
-   261                                  pedir_casillero_destino:
-   262 00000239 4883EC08                    sub rsp, 8
-   263 0000023D 48BF-                       mov rdi, msjIngFilaColumnaDestino
-   263 0000023F [1600000000000000] 
-   264 00000247 E8(00000000)                call printf
-   265 0000024C 4883C408                    add rsp, 8
-   266                                  
-   267 00000250 48BF-                       mov rdi, cadena      ; Dirección de 'cadena'
-   267 00000252 [0A00000000000000] 
-   268 0000025A 4883EC08                    sub rsp, 8
-   269 0000025E E8(00000000)                call gets
-   270 00000263 4883C408                    add rsp, 8
-   271                                  
-   272                                      ; Extraer el primer carácter (primer número)
-   273 00000267 480FB60425-                 movzx rax, byte [cadena]     ; Cargar el primer carácter de 'cadena' en rax
-   273 0000026C [0A000000]         
-   274 00000270 4883E830                    sub rax, '0'                 ; Convertir de ASCII a valor numérico
-   275 00000274 880425[36000000]            mov [posx_fin], al            ; Guardar el valor en 'posx_ini'
-   276                                      
-   277                                      ; Extraer el segundo carácter (segundo número)
-   278 0000027B 480FB60425-                 movzx rax, byte [cadena + 1] ; Cargar el segundo carácter de 'cadena' en rax
-   278 00000280 [0B000000]         
-   279 00000284 4883E830                    sub rax, '0'                 ; Convertir de ASCII a valor numérico
-   280 00000288 880425[37000000]            mov [posy_fin], al            ; Guardar el valor en 'posy_ini'
-   281 0000028F E9C8010000                  jmp es_destino_valido
-   282                                      
-   283                                  mostrar_jugador_actual:    
-   284 00000294 4883EC08                    sub rsp, 8
-   285 00000298 48BF-                       mov rdi, esTurnoDe
-   285 0000029A [4700000000000000] 
-   286 000002A2 488B3425[6F000000]          mov rsi, [jugadorActual]
-   287                                   
-   288 000002AA E8(00000000)                call printf
-   289 000002AF 4883C408                    add rsp, 8
-   290 000002B3 E965FDFFFF                  jmp pedir_movimiento
-   291                                      
-   292                                  actualizar_turno:
-   293 000002B8 8A0425[B8010000]            mov al, [turno]
-   294 000002BF 800425[B8010000]01          add byte [turno], 1
-   295 000002C7 8A0425[B8010000]            mov al, [turno]
-   296 000002CE 30E4                        xor ah, ah        ; Limpiar AH para asegurar que AX está correcto
-   297                                  
-   298                                      ; Dividir AX entre el divisor (2)
-   299 000002D0 4831DB                      xor rbx, rbx        
-   300 000002D3 8A1C25[B9010000]            mov bl, [divisor]
-   301 000002DA F6F3                        div bl            ; AX / BL -> AL = cociente, AH = resto
-   302                                  
-   303                                      ; Ahora, AH contiene el resto (turno % 2)
-   304 000002DC 80FC00                      cmp ah, 0         ; Compara el resto con 0
-   305 000002DF 7402                        je es_par         ; Si el resto es 0, turno es par
-   306 000002E1 EB1D                        jmp es_impar      ; Si no, turno es impar
-   307                                  
-   308                                  es_par:          
-   309 000002E3 C60425[B8010000]00          mov byte[turno], 0
-   310 000002EB 488D0425[5C000000]          lea rax, [oficiales]          ; Cargar la dirección de 'soldados' en AX
-   311 000002F3 48890425[6F000000]          mov [jugadorActual], rax
-   312 000002FB E94BFDFFFF                  jmp fin_actualizar_turno
-   313                                  
-   314                                  es_impar:        
-   315 00000300 C60425[B8010000]01          mov byte[turno], 1
-   316 00000308 488D0425[66000000]          lea rax, [soldados]          ; Cargar la dirección de 'soldados' en AX
-   317 00000310 48890425[6F000000]          mov [jugadorActual], rax
-   318 00000318 E92EFDFFFF                  jmp fin_actualizar_turno
-   319                                      
-   320                                  asignar_jugador_inicial:
-   321 0000031D 488D0425[66000000]          lea rax, [soldados]          ; Cargar la dirección de 'soldados' en AX
-   322 00000325 48890425[6F000000]          mov [jugadorActual], rax
-   323 0000032D E9DCFCFFFF                  jmp ciclo_juego
-   324                                      
-   325                                  validar_casillero_origen:
-   326                                      ;;valido que este dentro del tablero
-   327 00000332 4829C0                      sub rax, rax
-   328 00000335 4829DB                      sub rbx, rbx
-   329 00000338 8A0425[34000000]            mov al,[posx_ini]
-   330 0000033F 8A1C25[35000000]            mov bl,[posy_ini]
-   331                                      
-   332                                      validar_dentro_x:
-   333 00000346 3C01                        cmp al, 1
-   334 00000348 740E                        je validar_dentro_y
-   335 0000034A 3C02                        cmp al, 2
-   336 0000034C 740A                        je validar_dentro_y
-   337 0000034E 3C06                        cmp al, 6
-   338 00000350 7406                        je validar_dentro_y
-   339 00000352 3C07                        cmp al, 7
-   340 00000354 7402                        je validar_dentro_y
-   341 00000356 EB16                        jmp dentro_tablero_origen_ok
-   342                                  validar_dentro_y:
-   343 00000358 80FB01                      cmp bl, 1
-   344 0000035B 7475                        je origen_invalido
-   345 0000035D 80FB02                      cmp bl, 2
-   346 00000360 7470                        je origen_invalido
-   347 00000362 80FB06                      cmp bl, 6
-   348 00000365 746B                        je origen_invalido
-   349 00000367 80FB07                      cmp bl, 7
-   350 0000036A 7466                        je origen_invalido
-   351 0000036C EB00                        jmp dentro_tablero_origen_ok
-   352                                      
-   353                                  dentro_tablero_origen_ok:
-   354 0000036E 8A0425[B8010000]            mov al, [turno]
-   355 00000375 30E4                        xor ah, ah        ; Limpiar AH para asegurar que AX está correcto
-   356                                  
-   357                                      ; Dividir AX entre el divisor (2)
-   358 00000377 4831DB                      xor rbx, rbx        
-   359 0000037A 8A1C25[B9010000]            mov bl, [divisor]
-   360 00000381 F6F3                        div bl            ; AX / BL -> AL = cociente, AH = resto
-   361                                  
-   362                                      ; Ahora, AH contiene el resto (turno % 2)
-   363 00000383 80FC00                      cmp ah, 0         ; Compara el resto con 0
-   364 00000386 746B                        je es_oficial_valido         ; Si el resto es 0, turno es par
-   365 00000388 EB00                        jmp es_soldado_valido ; Si no, turno es impar
-   366                                      
-   367                                  es_soldado_valido:
-   368                                  ;busco el elemento en la matriz; y lo guardo en r10 para comparar el elemento.
-   369 0000038A 4829C9                      sub rcx, rcx
-   370 0000038D 4829C0                      sub rax, rax
-   371 00000390 4829DB                      sub rbx, rbx
-   372 00000393 4D29D2                      sub r10, r10
-   373 00000396 8A0425[34000000]            mov al,[posx_ini] 
-   374 0000039D 41B809000000                mov r8, cantidadFilas
-   375 000003A3 49F7E8                      imul r8
-   376 000003A6 4801C1                      add rcx,rax
-   377                                      
-   378 000003A9 8A0425[35000000]            mov al,[posy_ini]
-   379 000003B0 41B801000000                mov r8, longitudElemento 
-   380 000003B6 49F7E8                      imul r8
-   381 000003B9 4801C1                      add rcx,rax
-   382                                      
-   383 000003BC 48BB-                       mov rbx,matriz 
-   383 000003BE [BA01000000000000] 
-   384 000003C6 4801CB                      add rbx,rcx ;me posicione en la matriz
-   385                                  
-   386 000003C9 4C8B13                      mov r10, [rbx] ;guardo un elemento
-   387 000003CC 4180FA58                    cmp r10b, 'X'
-   388 000003D0 741C                        je turno_soldado_ok
-   389                                      ;sino fue un mal ingreso:
-   390                                  origen_invalido:
-   391 000003D2 48BF-                       mov rdi, casilleroInvalido
-   391 000003D4 [7800000000000000] 
-   392 000003DC 4883EC08                    sub rsp, 8
-   393 000003E0 E8(00000000)                call printf
-   394 000003E5 4883C408                    add rsp, 8
-   395 000003E9 E9E1FDFFFF                  jmp pedir_casillero_origen
-   396                                  turno_soldado_ok:
-   397 000003EE E92FFCFFFF                  jmp pedir_movimiento_destino
-   398                                      
-   399                                  es_oficial_valido:
-   400                                  ;busco el elemento en la matriz; y lo guardo en r10 para comparar el elemento.
-   401 000003F3 4829C9                      sub rcx, rcx
-   402 000003F6 4829C0                      sub rax, rax
-   403 000003F9 4829DB                      sub rbx, rbx
-   404 000003FC 4D29D2                      sub r10, r10
-   405 000003FF 8A0425[34000000]            mov al,[posx_ini] 
-   406 00000406 41B809000000                mov r8, cantidadFilas
-   407 0000040C 49F7E8                      imul r8
-   408 0000040F 4801C1                      add rcx,rax
-   409                                      
-   410 00000412 8A0425[35000000]            mov al,[posy_ini]
-   411 00000419 41B801000000                mov r8, longitudElemento 
-   412 0000041F 49F7E8                      imul r8
-   413 00000422 4801C1                      add rcx,rax
-   414                                      
-   415 00000425 48BB-                       mov rbx,matriz 
-   415 00000427 [BA01000000000000] 
-   416 0000042F 4801CB                      add rbx,rcx ;me posicione en la matriz
-   417                                  
-   418 00000432 4C8B13                      mov r10, [rbx] ;guardo un elemento
-   419                                  ;;
-   420 00000435 4180FA4F                    cmp r10b, 'O'
-   421 00000439 741C                        je turno_oficial_ok
-   422                                      ;sino fue un mal ingreso:
-   423 0000043B 48BF-                       mov rdi, casilleroInvalido
-   423 0000043D [7800000000000000] 
-   424 00000445 4883EC08                    sub rsp, 8
-   425 00000449 E8(00000000)                call printf
-   426 0000044E 4883C408                    add rsp, 8
-   427 00000452 E978FDFFFF                  jmp pedir_casillero_origen
-   428                                  turno_oficial_ok:
-   429 00000457 E9C6FBFFFF                  jmp pedir_movimiento_destino    
-   430                                      
-   431                                      
-   432                                  es_destino_valido:
-   433                                      ;;valido que este dentro del tablero
-   434 0000045C 4829C0                      sub rax, rax
-   435 0000045F 4829DB                      sub rbx, rbx
-   436 00000462 8A0425[36000000]            mov al,[posx_fin]
-   437 00000469 8A1C25[37000000]            mov bl,[posy_fin]
-   438                                      
-   439                                  validar_dentro_x_fin:
-   440 00000470 3C01                        cmp al, 1
-   441 00000472 740E                        je validar_dentro_y_fin
-   442 00000474 3C02                        cmp al, 2
-   443 00000476 740A                        je validar_dentro_y_fin
-   444 00000478 3C06                        cmp al, 6
-   445 0000047A 7406                        je validar_dentro_y_fin
-   446 0000047C 3C07                        cmp al, 7
-   447 0000047E 7402                        je validar_dentro_y_fin
-   448 00000480 EB16                        jmp dentro_tablero_destino_ok
-   449                                  validar_dentro_y_fin:
-   450 00000482 80FB01                      cmp bl, 1
-   451 00000485 7459                        je destino_invalido
-   452 00000487 80FB02                      cmp bl, 2
-   453 0000048A 7454                        je destino_invalido
-   454 0000048C 80FB06                      cmp bl, 6
-   455 0000048F 744F                        je destino_invalido
-   456 00000491 80FB07                      cmp bl, 7
-   457 00000494 744A                        je destino_invalido
-   458 00000496 EB00                        jmp dentro_tablero_destino_ok
-   459                                      
-   460                                  dentro_tablero_destino_ok:
-   461                                  ;busco el elemento en la matriz; y lo guardo en r10 para comparar el elemento.
-   462 00000498 4829C9                      sub rcx, rcx
-   463 0000049B 4829C0                      sub rax, rax
-   464 0000049E 4829DB                      sub rbx, rbx
-   465 000004A1 4D29D2                      sub r10, r10
-   466 000004A4 8A0425[36000000]            mov al,[posx_fin] 
-   467 000004AB 41B809000000                mov r8, cantidadFilas
-   468 000004B1 49F7E8                      imul r8
-   469 000004B4 4801C1                      add rcx,rax
-   470                                      
-   471 000004B7 8A0425[37000000]            mov al,[posy_fin]
-   472 000004BE 41B801000000                mov r8, longitudElemento 
-   473 000004C4 49F7E8                      imul r8
-   474 000004C7 4801C1                      add rcx,rax
-   475                                      
-   476 000004CA 48BB-                       mov rbx,matriz 
-   476 000004CC [BA01000000000000] 
-   477 000004D4 4801CB                      add rbx,rcx ;me posicione en la matriz
-   478                                  
-   479 000004D7 4C8B13                      mov r10, [rbx] ;guardo un elemento
-   480                                  ;;
-   481 000004DA 4180FA20                    cmp r10b, ' '
-   482 000004DE 741C                        je destino_ok
-   483                                      ;sino fue un mal ingreso:
-   484                                  destino_invalido:
-   485 000004E0 48BF-                       mov rdi, casilleroInvalido
-   485 000004E2 [7800000000000000] 
-   486 000004EA 4883EC08                    sub rsp, 8
-   487 000004EE E8(00000000)                call printf
-   488 000004F3 4883C408                    add rsp, 8
-   489 000004F7 E93DFDFFFF                  jmp pedir_casillero_destino
-   490                                  destino_ok:
-   491 000004FC E926FBFFFF                  jmp validar_movimiento    
-   492                                  validar_movimiento_oficial:
-   493 00000501 41BC00000000                mov r12,0
-   494 00000507 B800000000                  mov rax,0
-   495 0000050C 8A0425[34000000]            mov al, [posx_ini]
-   496 00000513 8A2425[36000000]            mov ah, [posx_fin]
-   497 0000051A 28E0                        sub al,ah
-   498                                  
-   499 0000051C BA00000000                  mov rdx,0
-   500 00000521 8A1425[35000000]            mov dl, [posy_ini]
-   501 00000528 8A3425[37000000]            mov dh, [posy_fin]
-   502 0000052F 28F2                        sub dl,dh
-   503                                  
-   504 00000531 3C00                        cmp al, 0
-   505 00000533 7410                        je validar_movimientos_oficial_horizontal ;;listo
-   506 00000535 3C01                        cmp al, 1
-   507 00000537 7428                        je validar_movimiento_simple_oficial_arriba_abajo ;;listo
-   508 00000539 3CFF                        cmp al,-1
-   509 0000053B 7424                        je validar_movimiento_simple_oficial_arriba_abajo ;;listo
-   510                                      
-   511 0000053D 3C02                        cmp al, 2
-   512 0000053F 7440                        je validar_movimiento_doble_oficial_superiores ;;voy a validar esto
-   513 00000541 3CFE                        cmp al,-2
-   514 00000543 7450                        je validar_movimiento_doble_oficial_inferiores ;;falta validar
-   515                                      
-   516                                  ;;esto valida OK movimientos simples y dobles horizontales (falta validar dobles horizontales)
-   517                                  validar_movimientos_oficial_horizontal:
-   518                                      ;;movimiento simple
-   519 00000545 80FA01                      cmp dl, 1
-   520 00000548 0F84DB000000                je movimiento_oficial_ok
-   521 0000054E 80FAFF                      cmp dl,-1
-   522 00000551 0F84D2000000                je movimiento_oficial_ok
-   523                                      ;;movimiento doble (comio)
-   524 00000557 80FA02                      cmp dl, 2
-   525 0000055A 744D                        je validar_movimiento_doble_izquierda ;; aca falta validar que haya X en el medio
-   526 0000055C 80FAFE                      cmp dl,-2
-   527 0000055F 744C                        je validar_movimiento_doble_derecha ;; aca falta validar que haya X en el medio
-   528                                  ;funcion ready (no necesita nada mas)
-   529                                  validar_movimiento_simple_oficial_arriba_abajo:
-   530                                      ;;si se movio 1 en x, solo puede ser movimiento simple
-   531 00000561 80FA01                      cmp dl, 1
-   532 00000564 0F84BF000000                je movimiento_oficial_ok
-   533 0000056A 80FAFF                      cmp dl,-1
-   534 0000056D 0F84B6000000                je movimiento_oficial_ok
-   535 00000573 80FA00                      cmp dl, 0
-   536 00000576 0F84AD000000                je movimiento_oficial_ok
-   537 0000057C E91C010000                  jmp movimiento_oficial_invalido
-   538                                  
-   539                                  ;;movimientos dobles!
-   540                                  validar_movimiento_doble_oficial_superiores:
-   541 00000581 80FA02                      cmp dl, 2
-   542 00000584 742B                        je validar_movimiento_doble_izquierda_superior
-   543 00000586 80FAFE                      cmp dl,-2
-   544 00000589 7430                        je validar_movimiento_doble_derecha_superior
-   545 0000058B 80FA00                      cmp dl, 0
-   546 0000058E 7427                        je validar_movimiento_doble_superior
-   547 00000590 E908010000                  jmp movimiento_oficial_invalido
-   548                                  
-   549                                  validar_movimiento_doble_oficial_inferiores:
-   550 00000595 80FA02                      cmp dl, 2
-   551 00000598 7427                        je validar_movimiento_doble_izquierda_inferior
-   552 0000059A 80FAFE                      cmp dl,-2
-   553 0000059D 742C                        je validar_movimiento_doble_derecha_inferior
-   554 0000059F 80FA00                      cmp dl, 0
-   555 000005A2 7423                        je validar_movimiento_doble_inferior
-   556 000005A4 E9F4000000                  jmp movimiento_oficial_invalido
-   557                                      
-   558                                  ;;tengo que validar que haya una X en los movimientos dobles
-   559                                  ;;voy a setear una posicion posx - posy para buscar elemento en la matriz
-   560                                  ;;si hay una X efectivamente habia un soldado -> eliminar soldado -> movimiento ok!
-   561                                  ;;else invalido.
-   562                                  
-   563                                  ;;hasta este momento en ah y dh estan los valores x y destino respectivamente
-   564                                  validar_movimiento_doble_izquierda:
-   565 000005A9 FEC6                        inc dh
-   566 000005AB EB24                        jmp validar_habia_soldado_en_movimiento_doble
-   567                                  validar_movimiento_doble_derecha:
-   568 000005AD FECE                        dec dh
-   569 000005AF EB20                        jmp validar_habia_soldado_en_movimiento_doble
-   570                                  validar_movimiento_doble_izquierda_superior:
-   571 000005B1 FEC6                        inc dh
-   572 000005B3 FEC4                        inc ah
-   573 000005B5 EB1A                        jmp validar_habia_soldado_en_movimiento_doble
-   574                                  validar_movimiento_doble_superior:
-   575 000005B7 FEC4                        inc ah
-   576 000005B9 EB16                        jmp validar_habia_soldado_en_movimiento_doble
-   577                                  validar_movimiento_doble_derecha_superior:
-   578 000005BB FECE                        dec dh
-   579 000005BD FEC4                        inc ah
-   580 000005BF EB10                        jmp validar_habia_soldado_en_movimiento_doble
-   581                                  validar_movimiento_doble_izquierda_inferior:
-   582 000005C1 FEC6                        inc dh
-   583 000005C3 FECC                        dec ah
-   584 000005C5 EB0A                        jmp validar_habia_soldado_en_movimiento_doble
-   585                                  validar_movimiento_doble_inferior:
-   586 000005C7 FECC                        dec ah
-   587 000005C9 EB06                        jmp validar_habia_soldado_en_movimiento_doble
-   588                                  validar_movimiento_doble_derecha_inferior:
-   589 000005CB FECE                        dec dh
-   590 000005CD FECC                        dec ah
-   591 000005CF EB00                        jmp validar_habia_soldado_en_movimiento_doble
-   592                                  
-   593                                  
-   594                                  ;;falta estar seguro de lo que hago aca. (validar X e Y..)
-   595                                  validar_habia_soldado_en_movimiento_doble:
-   596                                      
-   597 000005D1 4829DB                      sub rbx, rbx
-   598 000005D4 88E3                        mov bl, ah      
-   599 000005D6 4829C0                      sub rax, rax      
-   600 000005D9 88D8                        mov al, bl
-   601                                  
-   602 000005DB 4829DB                      sub rbx, rbx
-   603 000005DE 88F3                        mov bl, dh
-   604                                                  
-   605 000005E0 4829C9                      sub rcx, rcx
-   606 000005E3 4829D2                      sub rdx, rdx
-   607 000005E6 4D29C0                      sub r8, r8
-   608 000005E9 4D29D2                      sub r10, r10
-   609                                      
-   610                                   
-   611 000005EC 41B809000000                mov r8, cantidadFilas
-   612 000005F2 49F7E8                      imul r8
-   613 000005F5 4801C1                      add rcx,rax
-   614                                      
-   615 000005F8 88D8                        mov al, bl
-   616 000005FA 41B801000000                mov r8, longitudElemento 
-   617 00000600 49F7E8                      imul r8
-   618 00000603 4801C1                      add rcx,rax
-   619                                      
-   620 00000606 4829DB                      sub rbx, rbx   
-   621 00000609 48BB-                       mov rbx,matriz 
-   621 0000060B [BA01000000000000] 
-   622 00000613 4801CB                      add rbx,rcx ;me posicione en la matriz
-   623                                  
-   624 00000616 4C8B13                      mov r10, [rbx] ;guardo un elemento
-   625 00000619 4180FA58                    cmp r10b, 'X'
-   626 0000061D 7402                        je oficial_realizo_captura
-   627 0000061F EB7C                        jmp movimiento_oficial_invalido
-   628                                  
-   629                                  oficial_realizo_captura:
-   630 00000621 41BF01000000                mov r15, 1
-   631 00000627 EB00                        jmp movimiento_oficial_ok
-   632                                  
-   633                                  ;;fin;; validaciones terminan en estas 2 funciones.
-   634                                  movimiento_oficial_ok:
-   635                                      
-   636 00000629 4C8B4B01                    mov r9, [rbx+1] ;guardo en r9 lo que le sigue de matriz posterior al elemento a actualizar
-   637 0000062D 41B820000000                mov r8, " " ; lo muevo a un reg para darle (y estar seguro de su) longitud
-   638 00000633 4C8903                      mov [rbx],r8 ;muevo el valor(de igual longitud). muevo a la posicion de la matriz a actualizar
-   639                                      
-   640                                      ;despues de agregar el nuevo valor, agregarle el resto de la matriz que estaba antes.
-   641 00000636 4C894B01                    mov [rbx+1],r9
-   642 0000063A 41BC00000000                mov r12,0 ;si r12=0, movimiento OK
-   643                                  ;si se desentendio borrar el oficial que se movio.
-   644                                  ;    add r15, r13
-   645                                  ;    cmp r15, 1
-   646                                  ;    je borrar_oficial
-   647                                      ;else termina turno oficiales
-   648                                  termina_turno_oficiales:
-   649 00000640 E9F6F9FFFF                  jmp fue_movimiento_oficial_valido
-   650                                  borrar_oficial:
-   651                                  ;voy a la posicion destino y borro el "O"
-   652 00000645 4829C9                      sub rcx, rcx
-   653 00000648 4829C0                      sub rax, rax
-   654 0000064B 4829DB                      sub rbx, rbx
-   655 0000064E 4D29D2                      sub r10, r10
-   656 00000651 8A0425[36000000]            mov al,[posx_fin] ;guardo el valor de la fila, en AL(8bits) 
-   657                                                      ;ya que posx es db (byte= 8bits) sino guarda cualquier cosa
-   658                                  ;    sub rax,1 -> no es necesaria la resta ya que la matriz empieza en 1,1
-   659 00000658 41B809000000                mov r8, cantidadFilas
-   660 0000065E 49F7E8                      imul r8   ;me desplazo en la fila
-   661 00000661 4801C1                      add rcx,rax
-   662                                      
-   663 00000664 8A0425[37000000]            mov al,[posy_fin] ;guardo el valor de la col,
-   664                                  ;    sub rax,1
-   665 0000066B 41B801000000                mov r8, longitudElemento ;guardo en r8 para darle longitud y poder multiplicar usando imul
-   666 00000671 49F7E8                      imul r8 ;me desplazo en la columna
-   667 00000674 4801C1                      add rcx,rax ;sumo los desplazamientos
+   261 00000239 E9F9000000                  jmp validar_casillero_origen
+   262                                      
+   263                                  pedir_casillero_destino:
+   264 0000023E 4883EC08                    sub rsp, 8
+   265 00000242 48BF-                       mov rdi, msjIngFilaColumnaDestino
+   265 00000244 [1600000000000000] 
+   266 0000024C E8(00000000)                call printf
+   267 00000251 4883C408                    add rsp, 8
+   268                                  
+   269 00000255 48BF-                       mov rdi, cadena      ; Dirección de 'cadena'
+   269 00000257 [0A00000000000000] 
+   270 0000025F 4883EC08                    sub rsp, 8
+   271 00000263 E8(00000000)                call gets
+   272 00000268 4883C408                    add rsp, 8
+   273                                  
+   274                                      ; Extraer el primer carácter (primer número)
+   275 0000026C 480FB60425-                 movzx rax, byte [cadena]     ; Cargar el primer carácter de 'cadena' en rax
+   275 00000271 [0A000000]         
+   276 00000275 4883E830                    sub rax, '0'                 ; Convertir de ASCII a valor numérico
+   277 00000279 880425[36000000]            mov [posx_fin], al            ; Guardar el valor en 'posx_ini'
+   278                                      
+   279                                      ; Extraer el segundo carácter (segundo número)
+   280 00000280 480FB60425-                 movzx rax, byte [cadena + 1] ; Cargar el segundo carácter de 'cadena' en rax
+   280 00000285 [0B000000]         
+   281 00000289 4883E830                    sub rax, '0'                 ; Convertir de ASCII a valor numérico
+   282 0000028D 880425[37000000]            mov [posy_fin], al            ; Guardar el valor en 'posy_ini'
+   283 00000294 E9C8010000                  jmp es_destino_valido
+   284                                      
+   285                                  mostrar_jugador_actual:    
+   286 00000299 4883EC08                    sub rsp, 8
+   287 0000029D 48BF-                       mov rdi, esTurnoDe
+   287 0000029F [4700000000000000] 
+   288 000002A7 488B3425[6F000000]          mov rsi, [jugadorActual]
+   289                                   
+   290 000002AF E8(00000000)                call printf
+   291 000002B4 4883C408                    add rsp, 8
+   292 000002B8 E95BFDFFFF                  jmp pedir_movimiento
+   293                                      
+   294                                  actualizar_turno:
+   295 000002BD 8A0425[B8010000]            mov al, [turno]
+   296 000002C4 800425[B8010000]01          add byte [turno], 1
+   297 000002CC 8A0425[B8010000]            mov al, [turno]
+   298 000002D3 30E4                        xor ah, ah        ; Limpiar AH para asegurar que AX está correcto
+   299                                  
+   300                                      ; Dividir AX entre el divisor (2)
+   301 000002D5 4831DB                      xor rbx, rbx        
+   302 000002D8 8A1C25[B9010000]            mov bl, [divisor]
+   303 000002DF F6F3                        div bl            ; AX / BL -> AL = cociente, AH = resto
+   304                                  
+   305                                      ; Ahora, AH contiene el resto (turno % 2)
+   306 000002E1 80FC00                      cmp ah, 0         ; Compara el resto con 0
+   307 000002E4 7402                        je es_par         ; Si el resto es 0, turno es par
+   308 000002E6 EB1D                        jmp es_impar      ; Si no, turno es impar
+   309                                  
+   310                                  es_par:          
+   311 000002E8 C60425[B8010000]00          mov byte[turno], 0
+   312 000002F0 488D0425[5C000000]          lea rax, [oficiales]          ; Cargar la dirección de 'soldados' en AX
+   313 000002F8 48890425[6F000000]          mov [jugadorActual], rax
+   314 00000300 E946FDFFFF                  jmp fin_actualizar_turno
+   315                                  
+   316                                  es_impar:        
+   317 00000305 C60425[B8010000]01          mov byte[turno], 1
+   318 0000030D 488D0425[66000000]          lea rax, [soldados]          ; Cargar la dirección de 'soldados' en AX
+   319 00000315 48890425[6F000000]          mov [jugadorActual], rax
+   320 0000031D E929FDFFFF                  jmp fin_actualizar_turno
+   321                                      
+   322                                  asignar_jugador_inicial:
+   323 00000322 488D0425[66000000]          lea rax, [soldados]          ; Cargar la dirección de 'soldados' en AX
+   324 0000032A 48890425[6F000000]          mov [jugadorActual], rax
+   325 00000332 E9D7FCFFFF                  jmp ciclo_juego
+   326                                      
+   327                                  validar_casillero_origen:
+   328                                      ;;valido que este dentro del tablero
+   329 00000337 4829C0                      sub rax, rax
+   330 0000033A 4829DB                      sub rbx, rbx
+   331 0000033D 8A0425[34000000]            mov al,[posx_ini]
+   332 00000344 8A1C25[35000000]            mov bl,[posy_ini]
+   333                                      
+   334                                      validar_dentro_x:
+   335 0000034B 3C01                        cmp al, 1
+   336 0000034D 740E                        je validar_dentro_y
+   337 0000034F 3C02                        cmp al, 2
+   338 00000351 740A                        je validar_dentro_y
+   339 00000353 3C06                        cmp al, 6
+   340 00000355 7406                        je validar_dentro_y
+   341 00000357 3C07                        cmp al, 7
+   342 00000359 7402                        je validar_dentro_y
+   343 0000035B EB16                        jmp dentro_tablero_origen_ok
+   344                                  validar_dentro_y:
+   345 0000035D 80FB01                      cmp bl, 1
+   346 00000360 7475                        je origen_invalido
+   347 00000362 80FB02                      cmp bl, 2
+   348 00000365 7470                        je origen_invalido
+   349 00000367 80FB06                      cmp bl, 6
+   350 0000036A 746B                        je origen_invalido
+   351 0000036C 80FB07                      cmp bl, 7
+   352 0000036F 7466                        je origen_invalido
+   353 00000371 EB00                        jmp dentro_tablero_origen_ok
+   354                                      
+   355                                  dentro_tablero_origen_ok:
+   356 00000373 8A0425[B8010000]            mov al, [turno]
+   357 0000037A 30E4                        xor ah, ah        ; Limpiar AH para asegurar que AX está correcto
+   358                                  
+   359                                      ; Dividir AX entre el divisor (2)
+   360 0000037C 4831DB                      xor rbx, rbx        
+   361 0000037F 8A1C25[B9010000]            mov bl, [divisor]
+   362 00000386 F6F3                        div bl            ; AX / BL -> AL = cociente, AH = resto
+   363                                  
+   364                                      ; Ahora, AH contiene el resto (turno % 2)
+   365 00000388 80FC00                      cmp ah, 0         ; Compara el resto con 0
+   366 0000038B 746B                        je es_oficial_valido         ; Si el resto es 0, turno es par
+   367 0000038D EB00                        jmp es_soldado_valido ; Si no, turno es impar
+   368                                      
+   369                                  es_soldado_valido:
+   370                                  ;busco el elemento en la matriz; y lo guardo en r10 para comparar el elemento.
+   371 0000038F 4829C9                      sub rcx, rcx
+   372 00000392 4829C0                      sub rax, rax
+   373 00000395 4829DB                      sub rbx, rbx
+   374 00000398 4D29D2                      sub r10, r10
+   375 0000039B 8A0425[34000000]            mov al,[posx_ini] 
+   376 000003A2 41B809000000                mov r8, cantidadFilas
+   377 000003A8 49F7E8                      imul r8
+   378 000003AB 4801C1                      add rcx,rax
+   379                                      
+   380 000003AE 8A0425[35000000]            mov al,[posy_ini]
+   381 000003B5 41B801000000                mov r8, longitudElemento 
+   382 000003BB 49F7E8                      imul r8
+   383 000003BE 4801C1                      add rcx,rax
+   384                                      
+   385 000003C1 48BB-                       mov rbx,matriz 
+   385 000003C3 [BA01000000000000] 
+   386 000003CB 4801CB                      add rbx,rcx ;me posicione en la matriz
+   387                                  
+   388 000003CE 4C8B13                      mov r10, [rbx] ;guardo un elemento
+   389 000003D1 4180FA58                    cmp r10b, 'X'
+   390 000003D5 741C                        je turno_soldado_ok
+   391                                      ;sino fue un mal ingreso:
+   392                                  origen_invalido:
+   393 000003D7 48BF-                       mov rdi, casilleroInvalido
+   393 000003D9 [7800000000000000] 
+   394 000003E1 4883EC08                    sub rsp, 8
+   395 000003E5 E8(00000000)                call printf
+   396 000003EA 4883C408                    add rsp, 8
+   397 000003EE E9E1FDFFFF                  jmp pedir_casillero_origen
+   398                                  turno_soldado_ok:
+   399 000003F3 E925FCFFFF                  jmp pedir_movimiento_destino
+   400                                      
+   401                                  es_oficial_valido:
+   402                                  ;busco el elemento en la matriz; y lo guardo en r10 para comparar el elemento.
+   403 000003F8 4829C9                      sub rcx, rcx
+   404 000003FB 4829C0                      sub rax, rax
+   405 000003FE 4829DB                      sub rbx, rbx
+   406 00000401 4D29D2                      sub r10, r10
+   407 00000404 8A0425[34000000]            mov al,[posx_ini] 
+   408 0000040B 41B809000000                mov r8, cantidadFilas
+   409 00000411 49F7E8                      imul r8
+   410 00000414 4801C1                      add rcx,rax
+   411                                      
+   412 00000417 8A0425[35000000]            mov al,[posy_ini]
+   413 0000041E 41B801000000                mov r8, longitudElemento 
+   414 00000424 49F7E8                      imul r8
+   415 00000427 4801C1                      add rcx,rax
+   416                                      
+   417 0000042A 48BB-                       mov rbx,matriz 
+   417 0000042C [BA01000000000000] 
+   418 00000434 4801CB                      add rbx,rcx ;me posicione en la matriz
+   419                                  
+   420 00000437 4C8B13                      mov r10, [rbx] ;guardo un elemento
+   421                                  ;;
+   422 0000043A 4180FA4F                    cmp r10b, 'O'
+   423 0000043E 741C                        je turno_oficial_ok
+   424                                      ;sino fue un mal ingreso:
+   425 00000440 48BF-                       mov rdi, casilleroInvalido
+   425 00000442 [7800000000000000] 
+   426 0000044A 4883EC08                    sub rsp, 8
+   427 0000044E E8(00000000)                call printf
+   428 00000453 4883C408                    add rsp, 8
+   429 00000457 E978FDFFFF                  jmp pedir_casillero_origen
+   430                                  turno_oficial_ok:
+   431 0000045C E9BCFBFFFF                  jmp pedir_movimiento_destino    
+   432                                      
+   433                                      
+   434                                  es_destino_valido:
+   435                                      ;;valido que este dentro del tablero
+   436 00000461 4829C0                      sub rax, rax
+   437 00000464 4829DB                      sub rbx, rbx
+   438 00000467 8A0425[36000000]            mov al,[posx_fin]
+   439 0000046E 8A1C25[37000000]            mov bl,[posy_fin]
+   440                                      
+   441                                  validar_dentro_x_fin:
+   442 00000475 3C01                        cmp al, 1
+   443 00000477 740E                        je validar_dentro_y_fin
+   444 00000479 3C02                        cmp al, 2
+   445 0000047B 740A                        je validar_dentro_y_fin
+   446 0000047D 3C06                        cmp al, 6
+   447 0000047F 7406                        je validar_dentro_y_fin
+   448 00000481 3C07                        cmp al, 7
+   449 00000483 7402                        je validar_dentro_y_fin
+   450 00000485 EB16                        jmp dentro_tablero_destino_ok
+   451                                  validar_dentro_y_fin:
+   452 00000487 80FB01                      cmp bl, 1
+   453 0000048A 7459                        je destino_invalido
+   454 0000048C 80FB02                      cmp bl, 2
+   455 0000048F 7454                        je destino_invalido
+   456 00000491 80FB06                      cmp bl, 6
+   457 00000494 744F                        je destino_invalido
+   458 00000496 80FB07                      cmp bl, 7
+   459 00000499 744A                        je destino_invalido
+   460 0000049B EB00                        jmp dentro_tablero_destino_ok
+   461                                      
+   462                                  dentro_tablero_destino_ok:
+   463                                  ;busco el elemento en la matriz; y lo guardo en r10 para comparar el elemento.
+   464 0000049D 4829C9                      sub rcx, rcx
+   465 000004A0 4829C0                      sub rax, rax
+   466 000004A3 4829DB                      sub rbx, rbx
+   467 000004A6 4D29D2                      sub r10, r10
+   468 000004A9 8A0425[36000000]            mov al,[posx_fin] 
+   469 000004B0 41B809000000                mov r8, cantidadFilas
+   470 000004B6 49F7E8                      imul r8
+   471 000004B9 4801C1                      add rcx,rax
+   472                                      
+   473 000004BC 8A0425[37000000]            mov al,[posy_fin]
+   474 000004C3 41B801000000                mov r8, longitudElemento 
+   475 000004C9 49F7E8                      imul r8
+   476 000004CC 4801C1                      add rcx,rax
+   477                                      
+   478 000004CF 48BB-                       mov rbx,matriz 
+   478 000004D1 [BA01000000000000] 
+   479 000004D9 4801CB                      add rbx,rcx ;me posicione en la matriz
+   480                                  
+   481 000004DC 4C8B13                      mov r10, [rbx] ;guardo un elemento
+   482                                  ;;
+   483 000004DF 4180FA20                    cmp r10b, ' '
+   484 000004E3 741C                        je destino_ok
+   485                                      ;sino fue un mal ingreso:
+   486                                  destino_invalido:
+   487 000004E5 48BF-                       mov rdi, casilleroInvalido
+   487 000004E7 [7800000000000000] 
+   488 000004EF 4883EC08                    sub rsp, 8
+   489 000004F3 E8(00000000)                call printf
+   490 000004F8 4883C408                    add rsp, 8
+   491 000004FC E93DFDFFFF                  jmp pedir_casillero_destino
+   492                                  destino_ok:
+   493 00000501 E91CFBFFFF                  jmp validar_movimiento    
+   494                                  validar_movimiento_oficial:
+   495 00000506 41BC00000000                mov r12,0
+   496 0000050C B800000000                  mov rax,0
+   497 00000511 8A0425[34000000]            mov al, [posx_ini]
+   498 00000518 8A2425[36000000]            mov ah, [posx_fin]
+   499 0000051F 28E0                        sub al,ah
+   500                                  
+   501 00000521 BA00000000                  mov rdx,0
+   502 00000526 8A1425[35000000]            mov dl, [posy_ini]
+   503 0000052D 8A3425[37000000]            mov dh, [posy_fin]
+   504 00000534 28F2                        sub dl,dh
+   505                                  
+   506 00000536 3C00                        cmp al, 0
+   507 00000538 7410                        je validar_movimientos_oficial_horizontal ;;listo
+   508 0000053A 3C01                        cmp al, 1
+   509 0000053C 7428                        je validar_movimiento_simple_oficial_arriba_abajo ;;listo
+   510 0000053E 3CFF                        cmp al,-1
+   511 00000540 7424                        je validar_movimiento_simple_oficial_arriba_abajo ;;listo
+   512                                      
+   513 00000542 3C02                        cmp al, 2
+   514 00000544 7440                        je validar_movimiento_doble_oficial_superiores ;;voy a validar esto
+   515 00000546 3CFE                        cmp al,-2
+   516 00000548 7450                        je validar_movimiento_doble_oficial_inferiores ;;falta validar
+   517                                      
+   518                                  ;;esto valida OK movimientos simples y dobles horizontales (falta validar dobles horizontales)
+   519                                  validar_movimientos_oficial_horizontal:
+   520                                      ;;movimiento simple
+   521 0000054A 80FA01                      cmp dl, 1
+   522 0000054D 0F84DB000000                je movimiento_oficial_ok
+   523 00000553 80FAFF                      cmp dl,-1
+   524 00000556 0F84D2000000                je movimiento_oficial_ok
+   525                                      ;;movimiento doble (comio)
+   526 0000055C 80FA02                      cmp dl, 2
+   527 0000055F 744D                        je validar_movimiento_doble_izquierda ;; aca falta validar que haya X en el medio
+   528 00000561 80FAFE                      cmp dl,-2
+   529 00000564 744C                        je validar_movimiento_doble_derecha ;; aca falta validar que haya X en el medio
+   530                                  ;funcion ready (no necesita nada mas)
+   531                                  validar_movimiento_simple_oficial_arriba_abajo:
+   532                                      ;;si se movio 1 en x, solo puede ser movimiento simple
+   533 00000566 80FA01                      cmp dl, 1
+   534 00000569 0F84BF000000                je movimiento_oficial_ok
+   535 0000056F 80FAFF                      cmp dl,-1
+   536 00000572 0F84B6000000                je movimiento_oficial_ok
+   537 00000578 80FA00                      cmp dl, 0
+   538 0000057B 0F84AD000000                je movimiento_oficial_ok
+   539 00000581 E91F010000                  jmp movimiento_oficial_invalido
+   540                                  
+   541                                  ;;movimientos dobles!
+   542                                  validar_movimiento_doble_oficial_superiores:
+   543 00000586 80FA02                      cmp dl, 2
+   544 00000589 742B                        je validar_movimiento_doble_izquierda_superior
+   545 0000058B 80FAFE                      cmp dl,-2
+   546 0000058E 7430                        je validar_movimiento_doble_derecha_superior
+   547 00000590 80FA00                      cmp dl, 0
+   548 00000593 7427                        je validar_movimiento_doble_superior
+   549 00000595 E90B010000                  jmp movimiento_oficial_invalido
+   550                                  
+   551                                  validar_movimiento_doble_oficial_inferiores:
+   552 0000059A 80FA02                      cmp dl, 2
+   553 0000059D 7427                        je validar_movimiento_doble_izquierda_inferior
+   554 0000059F 80FAFE                      cmp dl,-2
+   555 000005A2 742C                        je validar_movimiento_doble_derecha_inferior
+   556 000005A4 80FA00                      cmp dl, 0
+   557 000005A7 7423                        je validar_movimiento_doble_inferior
+   558 000005A9 E9F7000000                  jmp movimiento_oficial_invalido
+   559                                      
+   560                                  ;;tengo que validar que haya una X en los movimientos dobles
+   561                                  ;;voy a setear una posicion posx - posy para buscar elemento en la matriz
+   562                                  ;;si hay una X efectivamente habia un soldado -> eliminar soldado -> movimiento ok!
+   563                                  ;;else invalido.
+   564                                  
+   565                                  ;;hasta este momento en ah y dh estan los valores x y destino respectivamente
+   566                                  validar_movimiento_doble_izquierda:
+   567 000005AE FEC6                        inc dh
+   568 000005B0 EB24                        jmp validar_habia_soldado_en_movimiento_doble
+   569                                  validar_movimiento_doble_derecha:
+   570 000005B2 FECE                        dec dh
+   571 000005B4 EB20                        jmp validar_habia_soldado_en_movimiento_doble
+   572                                  validar_movimiento_doble_izquierda_superior:
+   573 000005B6 FEC6                        inc dh
+   574 000005B8 FEC4                        inc ah
+   575 000005BA EB1A                        jmp validar_habia_soldado_en_movimiento_doble
+   576                                  validar_movimiento_doble_superior:
+   577 000005BC FEC4                        inc ah
+   578 000005BE EB16                        jmp validar_habia_soldado_en_movimiento_doble
+   579                                  validar_movimiento_doble_derecha_superior:
+   580 000005C0 FECE                        dec dh
+   581 000005C2 FEC4                        inc ah
+   582 000005C4 EB10                        jmp validar_habia_soldado_en_movimiento_doble
+   583                                  validar_movimiento_doble_izquierda_inferior:
+   584 000005C6 FEC6                        inc dh
+   585 000005C8 FECC                        dec ah
+   586 000005CA EB0A                        jmp validar_habia_soldado_en_movimiento_doble
+   587                                  validar_movimiento_doble_inferior:
+   588 000005CC FECC                        dec ah
+   589 000005CE EB06                        jmp validar_habia_soldado_en_movimiento_doble
+   590                                  validar_movimiento_doble_derecha_inferior:
+   591 000005D0 FECE                        dec dh
+   592 000005D2 FECC                        dec ah
+   593 000005D4 EB00                        jmp validar_habia_soldado_en_movimiento_doble
+   594                                  
+   595                                  
+   596                                  ;;falta estar seguro de lo que hago aca. (validar X e Y..)
+   597                                  validar_habia_soldado_en_movimiento_doble:
+   598                                      
+   599 000005D6 4829DB                      sub rbx, rbx
+   600 000005D9 88E3                        mov bl, ah      
+   601 000005DB 4829C0                      sub rax, rax      
+   602 000005DE 88D8                        mov al, bl
+   603                                  
+   604 000005E0 4829DB                      sub rbx, rbx
+   605 000005E3 88F3                        mov bl, dh
+   606                                                  
+   607 000005E5 4829C9                      sub rcx, rcx
+   608 000005E8 4829D2                      sub rdx, rdx
+   609 000005EB 4D29C0                      sub r8, r8
+   610 000005EE 4D29D2                      sub r10, r10
+   611                                      
+   612                                   
+   613 000005F1 41B809000000                mov r8, cantidadFilas
+   614 000005F7 49F7E8                      imul r8
+   615 000005FA 4801C1                      add rcx,rax
+   616                                      
+   617 000005FD 88D8                        mov al, bl
+   618 000005FF 41B801000000                mov r8, longitudElemento 
+   619 00000605 49F7E8                      imul r8
+   620 00000608 4801C1                      add rcx,rax
+   621                                      
+   622 0000060B 4829DB                      sub rbx, rbx   
+   623 0000060E 48BB-                       mov rbx,matriz 
+   623 00000610 [BA01000000000000] 
+   624 00000618 4801CB                      add rbx,rcx ;me posicione en la matriz
+   625                                  
+   626 0000061B 4C8B13                      mov r10, [rbx] ;guardo un elemento
+   627 0000061E 4180FA58                    cmp r10b, 'X'
+   628 00000622 7402                        je oficial_realizo_captura
+   629 00000624 EB7F                        jmp movimiento_oficial_invalido
+   630                                  
+   631                                  oficial_realizo_captura:
+   632 00000626 41BF01000000                mov r15, 1
+   633 0000062C EB00                        jmp movimiento_oficial_ok
+   634                                  
+   635                                  ;;fin;; validaciones terminan en estas 2 funciones.
+   636                                  movimiento_oficial_ok:
+   637                                      
+   638 0000062E 4C8B4B01                    mov r9, [rbx+1] ;guardo en r9 lo que le sigue de matriz posterior al elemento a actualizar
+   639 00000632 41B820000000                mov r8, " " ; lo muevo a un reg para darle (y estar seguro de su) longitud
+   640 00000638 4C8903                      mov [rbx],r8 ;muevo el valor(de igual longitud). muevo a la posicion de la matriz a actualizar
+   641                                      
+   642                                      ;despues de agregar el nuevo valor, agregarle el resto de la matriz que estaba antes.
+   643 0000063B 4C894B01                    mov [rbx+1],r9
+   644 0000063F 41BC00000000                mov r12,0 ;si r12=0, movimiento OK
+   645                                  ;si se desentendio borrar el oficial que se movio.
+   646                                      ;else termina turno oficiales
+   647                                  termina_turno_oficiales:
+   648 00000645 E9ECF9FFFF                  jmp fin_validacion_movimiento_oficial
+   649                                  borrar_oficial:
+   650                                  ;voy a la posicion destino y borro el "O"
+   651 0000064A 4829C9                      sub rcx, rcx
+   652 0000064D 4829C0                      sub rax, rax
+   653 00000650 4829DB                      sub rbx, rbx
+   654 00000653 4D29D2                      sub r10, r10
+   655 00000656 8A0425[34000000]            mov al,[posx_ini] ;guardo el valor de la fila, en AL(8bits) 
+   656                                                      ;ya que posx es db (byte= 8bits) sino guarda cualquier cosa
+   657                                  ;    sub rax,1 -> no es necesaria la resta ya que la matriz empieza en 1,1
+   658 0000065D 41B809000000                mov r8, cantidadFilas
+   659 00000663 49F7E8                      imul r8   ;me desplazo en la fila
+   660 00000666 4801C1                      add rcx,rax
+   661                                      
+   662 00000669 8A0425[35000000]            mov al,[posy_ini] ;guardo el valor de la col,
+   663                                  ;    sub rax,1
+   664 00000670 41B801000000                mov r8, longitudElemento ;guardo en r8 para darle longitud y poder multiplicar usando imul
+   665 00000676 49F7E8                      imul r8 ;me desplazo en la columna
+   666 00000679 4801C1                      add rcx,rax ;sumo los desplazamientos
+   667                                      
    668                                      
-   669                                      
-   670 00000677 48BB-                       mov rbx,matriz ;pongo el pto al inicio de la matriz
-   670 00000679 [BA01000000000000] 
-   671 00000681 4801CB                      add rbx,rcx ;me posicione en la matriz
-   672                                  
-   673 00000684 4C8B13                      mov r10, [rbx] ;guardo un elemento
-   674 00000687 4C8B4B01                    mov r9, [rbx+1] ;guardo en r9 lo que le sigue de matriz posterior al elemento a actualizar
-   675 0000068B 41B820000000                mov r8, " " ; lo muevo a un reg para darle (y estar seguro de su) longitud
-   676 00000691 4C8903                      mov [rbx],r8 ;muevo el valor(de igual longitud). muevo a la posicion de la matriz a actualizar
-   677                                      
-   678                                      ;despues de agregar el nuevo valor, agregarle el resto de la matriz que estaba antes.
-   679 00000694 4C894B01                    mov [rbx+1],r9
-   680                                      
-   681 00000698 49FFCE                      dec r14 ;descuento un oficial
-   682 0000069B EBA3                        jmp termina_turno_oficiales
-   683                                  
-   684                                  movimiento_oficial_invalido:
-   685 0000069D 48BF-                       mov rdi,msj_movimiento_oficial_invalido
-   685 0000069F [8D00000000000000] 
-   686 000006A7 4883EC08                    sub rsp, 8
-   687 000006AB E8(00000000)                call printf
-   688 000006B0 4883C408                    add rsp,8
-   689                                      
-   690 000006B4 41BC01000000                mov r12,1
-   691 000006BA E97CF9FFFF                  jmp fue_movimiento_oficial_valido
-   692                                  
-   693                                  movimiento_soldado_invalido:
-   694 000006BF 4889E0                      mov rax, rsp
-   695 000006C2 4883E00F                    and rax, 15
-   696 000006C6 7404                        je no_restar_rsp
-   697 000006C8 4883EC08                    sub rsp, 8
-   698                                  no_restar_rsp:
-   699 000006CC 48BF-                       mov rdi,msj_movimiento_soldado_invalido
-   699 000006CE [C200000000000000] 
-   700 000006D6 E8(00000000)                call printf
-   701 000006DB 4883C408                    add rsp,8
-   702 000006DF E939F9FFFF                  jmp pedir_movimiento
-   703                                  
-   704                                  movimiento_soldado_valido:
-   705 000006E4 41BF00000000                mov r15, 0 ;reseteo r15
-   706 000006EA E952F9FFFF                  jmp prox_turno
-   707                                  
-   708                                  validar_si_oficial_puede_comer_en_el_proximo_turno:
-   709                                      ;encontrar oficial_1 (solo con el desplazamiento)
-   710 000006EF 4829C9                      sub rcx, rcx
-   711 000006F2 4829C0                      sub rax, rax
-   712 000006F5 4829DB                      sub rbx, rbx
-   713 000006F8 4D29D2                      sub r10, r10
-   714                                      
-   715 000006FB 48BB-                       mov rbx,matriz ;pongo el pto al inicio de la matriz
-   715 000006FD [BA01000000000000] 
-   716                                  actualizo_indice:
-   717 00000705 4C8B13                      mov r10, [rbx] ;guardo el oficial_1
-   718 00000708 4180FA4F                    cmp r10b, 'O'
-   719 0000070C 7405                        je revisar_si_oficial_puede_comer
-   720 0000070E 48FFC3                      inc rbx
-   721 00000711 EBF2                        jmp actualizo_indice
+   669 0000067C 48BB-                       mov rbx,matriz ;pongo el pto al inicio de la matriz
+   669 0000067E [BA01000000000000] 
+   670 00000686 4801CB                      add rbx,rcx ;me posicione en la matriz
+   671                                  
+   672 00000689 4C8B13                      mov r10, [rbx] ;guardo un elemento
+   673 0000068C 4C8B4B01                    mov r9, [rbx+1] ;guardo en r9 lo que le sigue de matriz posterior al elemento a actualizar
+   674 00000690 41B820000000                mov r8, " " ; lo muevo a un reg para darle (y estar seguro de su) longitud
+   675 00000696 4C8903                      mov [rbx],r8 ;muevo el valor(de igual longitud). muevo a la posicion de la matriz a actualizar
+   676                                      
+   677                                      ;despues de agregar el nuevo valor, agregarle el resto de la matriz que estaba antes.
+   678 00000699 4C894B01                    mov [rbx+1],r9
+   679                                      
+   680 0000069D 49FFCE                      dec r14 ;descuento un oficial
+   681 000006A0 E92AFBFFFF                  jmp fin_validar_desatendido
+   682                                  
+   683                                  movimiento_oficial_invalido:
+   684 000006A5 48BF-                       mov rdi,msj_movimiento_oficial_invalido
+   684 000006A7 [8D00000000000000] 
+   685 000006AF 4883EC08                    sub rsp, 8
+   686 000006B3 E8(00000000)                call printf
+   687 000006B8 4883C408                    add rsp,8
+   688                                      
+   689 000006BC 41BC01000000                mov r12,1
+   690 000006C2 E96FF9FFFF                  jmp fin_validacion_movimiento_oficial
+   691                                  
+   692                                  movimiento_soldado_invalido:
+   693 000006C7 4889E0                      mov rax, rsp
+   694 000006CA 4883E00F                    and rax, 15
+   695 000006CE 7404                        je no_restar_rsp
+   696 000006D0 4883EC08                    sub rsp, 8
+   697                                  no_restar_rsp:
+   698 000006D4 48BF-                       mov rdi,msj_movimiento_soldado_invalido
+   698 000006D6 [C200000000000000] 
+   699 000006DE E8(00000000)                call printf
+   700 000006E3 4883C408                    add rsp,8
+   701 000006E7 E92CF9FFFF                  jmp pedir_movimiento
+   702                                  
+   703                                  movimiento_soldado_valido:
+   704 000006EC 41BF00000000                mov r15, 0 ;reseteo r15 antes que jueguen los oficiales
+   705 000006F2 E94AF9FFFF                  jmp prox_turno
+   706                                  
+   707                                  validar_si_oficial_debe_comer_prox_turno:
+   708                                      ;encontrar oficial_1 (solo con el desplazamiento)
+   709 000006F7 4829C9                      sub rcx, rcx
+   710 000006FA 4829C0                      sub rax, rax
+   711 000006FD 4829DB                      sub rbx, rbx
+   712 00000700 4D29D2                      sub r10, r10
+   713                                      
+   714 00000703 48BB-                       mov rbx,matriz ;pongo el pto al inicio de la matriz
+   714 00000705 [BA01000000000000] 
+   715                                  actualizo_indice:
+   716 0000070D 4C8B13                      mov r10, [rbx] ;guardo el oficial_1
+   717 00000710 4180FA4F                    cmp r10b, 'O'
+   718 00000714 7405                        je revisar_si_oficial_puede_comer
+   719 00000716 48FFC3                      inc rbx
+   720 00000719 EBF2                        jmp actualizo_indice
+   721                                  
    722                                  
-   723                                  
-   724                                  ;;;;;;;;aca viene lo bueno
-   725                                  revisar_si_oficial_puede_comer:
-   726                                      ;tengo en rbx la matriz en el indice del soldado.
-   727                                  revisar_celda_derecha:
-   728 00000713 4C8B5301                    mov r10, [rbx+1]; +1 = a la derecha de la posicion actual
-   729 00000717 4180FA58                    cmp r10b, 'X'
-   730 0000071B 7402                        je revisar_captura_derecha
-   731 0000071D EB0E                        jmp revisar_celda_abajo_derecha
-   732                                  revisar_captura_derecha:
-   733 0000071F 4C8B5302                    mov r10, [rbx+2] ;+2 = a la derecha 2posiciones de la posicion actual
-   734 00000723 4180FA20                    cmp r10b, ' '
-   735 00000727 0F84A9000000                je oficiales_pueden_comer
-   736                                  
-   737                                  revisar_celda_abajo_derecha:
-   738 0000072D 4C8B530A                    mov r10, [rbx+10]; +10 = a la derecha abajo de la posicion actual
-   739 00000731 4180FA58                    cmp r10b, 'X'
-   740 00000735 7402                        je revisar_captura_abajo_derecha
-   741 00000737 EB0E                        jmp revisar_celda_abajo
-   742                                  revisar_captura_abajo_derecha:
-   743 00000739 4C8B5314                    mov r10, [rbx+20] ;+2 = a la derecha abajo 2posiciones de la posicion actual
-   744 0000073D 4180FA20                    cmp r10b, ' '
-   745 00000741 0F848F000000                je oficiales_pueden_comer
-   746                                  
-   747                                  revisar_celda_abajo:
-   748 00000747 4C8B5309                    mov r10, [rbx+9]; +1 = abajo de la posicion actual
-   749 0000074B 4180FA58                    cmp r10b, 'X'
-   750 0000074F 7402                        je revisar_captura_abajo
-   751 00000751 EB0A                        jmp revisar_celda_abajo_izquierda
-   752                                  revisar_captura_abajo:
-   753 00000753 4C8B5312                    mov r10, [rbx+18] ;+2 = abajo 2posiciones de la posicion actual
-   754 00000757 4180FA20                    cmp r10b, ' '
-   755 0000075B 7479                        je oficiales_pueden_comer
-   756                                  
-   757                                  revisar_celda_abajo_izquierda:
-   758 0000075D 4C8B5308                    mov r10, [rbx+8]
-   759 00000761 4180FA58                    cmp r10b, 'X'
-   760 00000765 7402                        je revisar_captura_abajo_izquierda
-   761 00000767 EB0A                        jmp revisar_celda_izquierda
-   762                                  revisar_captura_abajo_izquierda:
-   763 00000769 4C8B5310                    mov r10, [rbx+16]
-   764 0000076D 4180FA20                    cmp r10b, ' '
-   765 00000771 7463                        je oficiales_pueden_comer
-   766                                  
-   767                                  revisar_celda_izquierda:
-   768 00000773 4C8B53FF                    mov r10, [rbx-1]
-   769 00000777 4180FA58                    cmp r10b, 'X'
-   770 0000077B 7402                        je revisar_captura_izquierda
-   771 0000077D EB0A                        jmp revisar_celda_arriba_izquierda
-   772                                  revisar_captura_izquierda:
-   773 0000077F 4C8B53FE                    mov r10, [rbx-2]
-   774 00000783 4180FA20                    cmp r10b, ' '
-   775 00000787 744D                        je oficiales_pueden_comer
-   776                                  
-   777                                  revisar_celda_arriba_izquierda:
-   778 00000789 4C8B53F6                    mov r10, [rbx-10]
-   779 0000078D 4180FA58                    cmp r10b, 'X'
-   780 00000791 7402                        je revisar_captura_arriba_izquierda
-   781 00000793 EB0A                        jmp revisar_celda_arriba
-   782                                  revisar_captura_arriba_izquierda:
-   783 00000795 4C8B53EC                    mov r10, [rbx-20]
-   784 00000799 4180FA20                    cmp r10b, ' '
-   785 0000079D 7437                        je oficiales_pueden_comer
-   786                                  
-   787                                  revisar_celda_arriba:
-   788 0000079F 4C8B53F7                    mov r10, [rbx-9]
-   789 000007A3 4180FA58                    cmp r10b, 'X'
-   790 000007A7 7402                        je revisar_captura_arriba
-   791 000007A9 EB0A                        jmp revisar_celda_arriba_derecha
-   792                                  revisar_captura_arriba:
-   793 000007AB 4C8B53EE                    mov r10, [rbx-18]
-   794 000007AF 4180FA20                    cmp r10b, ' '
-   795 000007B3 7421                        je oficiales_pueden_comer
-   796                                  
-   797                                  revisar_celda_arriba_derecha:
-   798 000007B5 4C8B53F8                    mov r10, [rbx-8]
-   799 000007B9 4180FA58                    cmp r10b, 'X'
-   800 000007BD 7402                        je revisar_captura_arriba_derecha
-   801 000007BF EB0A                        jmp oficiales_no_pueden_comer ;fin de validaciones
-   802                                  revisar_captura_arriba_derecha:
-   803 000007C1 4C8B53F0                    mov r10, [rbx-16]
-   804 000007C5 4180FA20                    cmp r10b, ' '
-   805 000007C9 740B                        je oficiales_pueden_comer
-   806                                  
-   807                                  oficiales_no_pueden_comer:
-   808 000007CB 41BD00000000                mov r13, 0 ;se resetea siempre antes que jueguen oficiales
-   809 000007D1 E9B6F9FFFF                  jmp validar_desatendido
-   810                                      
-   811                                  oficiales_pueden_comer:
-   812 000007D6 41BD01000000                mov r13, 1 ;se resetea siempre antes que jueguen oficiales
-   813 000007DC E9ABF9FFFF                  jmp validar_desatendido
-   814                                  
-   815                                  verificar_ganador:
-   816 000007E1 4983FE00                    cmp r14, 0
-   817 000007E5 0F8495000000                je ganaron_soldados_por_falta_oficiales
-   818                                  verificar_invasion:
-   819 000007EB 4829C9                      sub rcx, rcx
-   820 000007EE 4829C0                      sub rax, rax
-   821 000007F1 4829DB                      sub rbx, rbx
-   822 000007F4 4D29D2                      sub r10, r10
-   823 000007F7 B005                        mov al, 5
-   824 000007F9 41B809000000                mov r8, cantidadFilas
-   825 000007FF 49F7E8                      imul r8
-   826 00000802 4801C1                      add rcx,rax
-   827                                      
-   828 00000805 B003                        mov al, 3
-   829 00000807 41B801000000                mov r8, longitudElemento 
-   830 0000080D 49F7E8                      imul r8
-   831 00000810 4801C1                      add rcx,rax
-   832                                      
-   833 00000813 48BB-                       mov rbx,matriz 
-   833 00000815 [BA01000000000000] 
-   834 0000081D 4801CB                      add rbx,rcx ;me posicione en la matriz
-   835                                  
-   836                                  ;fila_5_fortaleza
-   837 00000820 4C8B13                      mov r10, [rbx] ;guardo un elemento
-   838 00000823 4180FA58                    cmp r10b, 'X'
-   839 00000827 7552                        jne no_invadieron_la_fortaleza
-   840 00000829 4C8B5301                    mov r10, [rbx+1] ;guardo un elemento
-   841 0000082D 4180FA58                    cmp r10b, 'X'
-   842 00000831 7548                        jne no_invadieron_la_fortaleza
-   843 00000833 4C8B5302                    mov r10, [rbx+2] ;guardo un elemento
-   844 00000837 4180FA58                    cmp r10b, 'X'
-   845 0000083B 753E                        jne no_invadieron_la_fortaleza
-   846                                  ;fila_6_fortaleza
-   847 0000083D 4C8B5309                    mov r10, [rbx+9] ;guardo un elemento
-   848 00000841 4180FA58                    cmp r10b, 'X'
-   849 00000845 7534                        jne no_invadieron_la_fortaleza
-   850 00000847 4C8B530A                    mov r10, [rbx+10] ;guardo un elemento
-   851 0000084B 4180FA58                    cmp r10b, 'X'
-   852 0000084F 752A                        jne no_invadieron_la_fortaleza
-   853 00000851 4C8B530B                    mov r10, [rbx+11] ;guardo un elemento
-   854 00000855 4180FA58                    cmp r10b, 'X'
-   855 00000859 7520                        jne no_invadieron_la_fortaleza
-   856                                  ;fila_7_fortaleza
-   857 0000085B 4C8B5312                    mov r10, [rbx+18] ;guardo un elemento
-   858 0000085F 4180FA58                    cmp r10b, 'X'
-   859 00000863 7516                        jne no_invadieron_la_fortaleza
-   860 00000865 4C8B5313                    mov r10, [rbx+19] ;guardo un elemento
-   861 00000869 4180FA58                    cmp r10b, 'X'
-   862 0000086D 750C                        jne no_invadieron_la_fortaleza
-   863 0000086F 4C8B5314                    mov r10, [rbx+20] ;guardo un elemento
-   864 00000873 4180FA58                    cmp r10b, 'X'
-   865 00000877 7502                        jne no_invadieron_la_fortaleza
-   866                                  
-   867 00000879 EB2B                        jmp ganaron_soldados_por_invasion
-   868                                      
-   869                                  no_invadieron_la_fortaleza:
-   870 0000087B E9D0F7FFFF                  jmp fin_verificar_ganador
-   871                                  
-   872                                  ganaron_soldados_por_falta_oficiales:
-   873 00000880 E819F9FFFF                  call clear_screen
-   874 00000885 E8E6F7FFFF                  call mostrar_tablero
-   875 0000088A 48BF-                       mov rdi,msj_ganaron_soldados_por_falta_oficiales
-   875 0000088C [F700000000000000] 
-   876 00000894 4883EC08                    sub rsp, 8
-   877 00000898 E8(00000000)                call printf
-   878 0000089D 4883C408                    add rsp,8
-   879 000008A1 E9ACF7FFFF                  jmp fin
-   880                                  
-   881                                  ganaron_soldados_por_invasion:
-   882 000008A6 E8F3F8FFFF                  call clear_screen
-   883 000008AB E8C0F7FFFF                  call mostrar_tablero
-   884 000008B0 48BF-                       mov rdi,msj_ganaron_soldados_por_invasion
-   884 000008B2 [4501000000000000] 
-   885 000008BA 4883EC08                    sub rsp, 8
-   886 000008BE E8(00000000)                call printf
-   887 000008C3 4883C408                    add rsp,8
-   888 000008C7 E986F7FFFF                  jmp fin
-   889                                  
-   890                                  
-   891                                  
-   892                                  validar_movimiento_soldado:
-   893 000008CC B800000000                  mov rax,0
-   894                                      
-   895 000008D1 8A0425[36000000]            mov al, [posx_fin]
-   896 000008D8 8A2425[34000000]            mov ah, [posx_ini]
-   897 000008DF 28E0                        sub al, ah
-   898                                  
-   899 000008E1 3C00                        cmp al, 0
-   900 000008E3 7415                        je validar_movimiento_soldado_horizontal
-   901 000008E5 3CFF                        cmp al,-1 
-   902 000008E7 0F84D6000000                je validar_movimiento_soldado_arriba
-   903 000008ED 3C01                        cmp al, 1
-   904 000008EF 0F845C010000                je validar_movimiento_soldado_abajo
-   905 000008F5 E9C5FDFFFF                  jmp movimiento_soldado_invalido
-   906                                      
-   907                                  ;fn terminada
-   908                                  validar_movimiento_soldado_horizontal:
-   909 000008FA B800000000                  mov rax,0
-   910 000008FF 8A0425[34000000]            mov al, [posx_ini]
-   911                                  
-   912 00000906 3C07                        cmp al, 7
-   913 00000908 740D                        je validar_movimiento_soldado_horizontal_fila_siete_seis
-   914 0000090A 3C06                        cmp al, 6
-   915 0000090C 7409                        je validar_movimiento_soldado_horizontal_fila_siete_seis
-   916 0000090E 3C05                        cmp al, 5
-   917 00000910 7451                        je validar_movimiento_soldado_horizontal_fila_cinco
-   918                                  
-   919 00000912 E9A8FDFFFF                  jmp movimiento_soldado_invalido
-   920                                  
-   921                                  ;fn terminada
-   922                                  validar_movimiento_soldado_horizontal_fila_siete_seis:
-   923 00000917 BA00000000                  mov rdx,0
-   924 0000091C 8A1425[35000000]            mov dl, [posy_ini]
-   925 00000923 8A3425[37000000]            mov dh, [posy_fin]
-   926                                  
-   927 0000092A 80FA03                      cmp dl, 3
-   928 0000092D 740F                        je validar_movimiento_soldado_horizontal_columna_tres_cinco
-   929 0000092F 80FA04                      cmp dl, 4
-   930 00000932 7418                        je validar_movimiento_soldado_horizontal_columna_cuatro
-   931 00000934 80FA05                      cmp dl, 5
-   932 00000937 7405                        je validar_movimiento_soldado_horizontal_columna_tres_cinco
-   933 00000939 E981FDFFFF                  jmp movimiento_soldado_invalido
-   934                                  
-   935                                  validar_movimiento_soldado_horizontal_columna_tres_cinco:
-   936 0000093E 80FE04                      cmp dh, 4
-   937 00000941 0F849DFDFFFF                je movimiento_soldado_valido
-   938 00000947 E973FDFFFF                  jmp movimiento_soldado_invalido
-   939                                  
-   940                                  validar_movimiento_soldado_horizontal_columna_cuatro:
-   941 0000094C 80FE03                      cmp dh, 3
-   942 0000094F 0F848FFDFFFF                je movimiento_soldado_valido
-   943 00000955 80FE05                      cmp dh, 5
-   944 00000958 0F8486FDFFFF                je movimiento_soldado_valido
-   945 0000095E E95CFDFFFF                  jmp movimiento_soldado_invalido
-   946                                  
-   947                                  validar_movimiento_soldado_horizontal_fila_cinco:
-   948 00000963 BA00000000                  mov rdx,0
-   949 00000968 8A1425[35000000]            mov dl, [posy_ini]
-   950 0000096F 8A3425[37000000]            mov dh, [posy_fin]
-   951                                      
-   952 00000976 80FA03                      cmp dl, 3
-   953 00000979 7E0F                        jle movimiento_soldado_derecha
-   954 0000097B 80FA04                      cmp dl, 4
-   955 0000097E 742A                        je movimiento_soldado_derecha_izquierda
-   956 00000980 80FA07                      cmp dl, 7
-   957 00000983 7E15                        jle movimiento_soldado_izquierda
-   958 00000985 E935FDFFFF                  jmp movimiento_soldado_invalido
-   959                                  
-   960                                  movimiento_soldado_derecha:
-   961 0000098A 28D6                        sub dh,dl
-   962 0000098C 80FE01                      cmp dh, 1
-   963 0000098F 0F844FFDFFFF                je movimiento_soldado_valido
-   964 00000995 E925FDFFFF                  jmp movimiento_soldado_invalido
-   965                                  
-   966                                  movimiento_soldado_izquierda:
-   967 0000099A 28D6                        sub dh,dl
-   968 0000099C 80FEFF                      cmp dh,-1
-   969 0000099F 0F843FFDFFFF                je movimiento_soldado_valido
-   970 000009A5 E915FDFFFF                  jmp movimiento_soldado_invalido
-   971                                  
-   972                                  movimiento_soldado_derecha_izquierda:
-   973 000009AA 28D6                        sub dh,dl
-   974 000009AC 80FEFF                      cmp dh,-1
-   975 000009AF 0F842FFDFFFF                je movimiento_soldado_valido
-   976 000009B5 80FE01                      cmp dh, 1
-   977 000009B8 0F8426FDFFFF                je movimiento_soldado_valido
-   978 000009BE E9FCFCFFFF                  jmp movimiento_soldado_invalido
-   979                                  
-   980                                  ;;fin validar movimientos horizontales
-   981                                  validar_movimiento_soldado_arriba:
-   982 000009C3 B800000000                  mov rax,0
-   983 000009C8 8A0425[34000000]            mov al, [posx_ini]
-   984                                      
-   985 000009CF 3C06                        cmp al, 6
-   986 000009D1 7409                        je validar_movimiento_soldado_arriba_en_fortaleza
-   987 000009D3 3C07                        cmp al, 7
-   988 000009D5 7405                        je validar_movimiento_soldado_arriba_en_fortaleza
-   989 000009D7 E9E3FCFFFF                  jmp movimiento_soldado_invalido
-   990                                  
-   991                                  validar_movimiento_soldado_arriba_en_fortaleza:
-   992 000009DC BA00000000                  mov rdx,0
-   993 000009E1 8A1425[35000000]            mov dl, [posy_ini]
-   994 000009E8 8A3425[37000000]            mov dh, [posy_fin]
-   995                                  
-   996 000009EF 80FA03                      cmp dl, 3
-   997 000009F2 740F                        je validar_movimiento_soldado_arriba_en_fortaleza_columna_tres
-   998 000009F4 80FA04                      cmp dl, 4
-   999 000009F7 7421                        je validar_movimiento_soldado_arriba_en_fortaleza_columna_cuatro
-  1000 000009F9 80FA05                      cmp dl, 5
-  1001 000009FC 743C                        je validar_movimiento_soldado_arriba_en_fortaleza_columna_cinco
-  1002 000009FE E9BCFCFFFF                  jmp movimiento_soldado_invalido
-  1003                                  
-  1004                                  validar_movimiento_soldado_arriba_en_fortaleza_columna_tres:
-  1005 00000A03 80FE03                      cmp dh, 3
-  1006 00000A06 0F84D8FCFFFF                je movimiento_soldado_valido
-  1007 00000A0C 80FE04                      cmp dh, 4
-  1008 00000A0F 0F84CFFCFFFF                je movimiento_soldado_valido
-  1009 00000A15 E9A5FCFFFF                  jmp movimiento_soldado_invalido
-  1010                                  
-  1011                                  validar_movimiento_soldado_arriba_en_fortaleza_columna_cuatro:
-  1012 00000A1A 80FE03                      cmp dh, 3
-  1013 00000A1D 0F84C1FCFFFF                je movimiento_soldado_valido
-  1014 00000A23 80FE04                      cmp dh, 4
-  1015 00000A26 0F84B8FCFFFF                je movimiento_soldado_valido
-  1016 00000A2C 80FE05                      cmp dh, 5
-  1017 00000A2F 0F84AFFCFFFF                je movimiento_soldado_valido
-  1018 00000A35 E985FCFFFF                  jmp movimiento_soldado_invalido
-  1019                                  
-  1020                                  validar_movimiento_soldado_arriba_en_fortaleza_columna_cinco:
-  1021 00000A3A 80FE04                      cmp dh, 4
-  1022 00000A3D 0F84A1FCFFFF                je movimiento_soldado_valido
-  1023 00000A43 80FE05                      cmp dh, 5
-  1024 00000A46 0F8498FCFFFF                je movimiento_soldado_valido
-  1025 00000A4C E96EFCFFFF                  jmp movimiento_soldado_invalido
-  1026                                  
-  1027                                  validar_movimiento_soldado_abajo:
-  1028 00000A51 BA00000000                  mov rdx,0
-  1029 00000A56 8A1425[35000000]            mov dl, [posy_ini]
-  1030 00000A5D 8A3425[37000000]            mov dh, [posy_fin]
-  1031                                      
-  1032 00000A64 28D6                        sub dh, dl
-  1033 00000A66 80FEFF                      cmp dh,-1
-  1034 00000A69 0F8475FCFFFF                je movimiento_soldado_valido
-  1035 00000A6F 80FE00                      cmp dh, 0
-  1036 00000A72 0F846CFCFFFF                je movimiento_soldado_valido
-  1037 00000A78 80FE01                      cmp dh, 1
-  1038 00000A7B 0F8463FCFFFF                je movimiento_soldado_valido
-  1039 00000A81 E939FCFFFF                  jmp movimiento_soldado_invalido
-  1040                                  
-  1041                                  ;;fin validar_movimiento_soldado
-  1042 00000A86 E9B6F5FFFF                  jmp prox_turno
+   723                                  ;;;;;;;;aca viene lo bueno
+   724                                  revisar_si_oficial_puede_comer:
+   725                                      ;tengo en rbx la matriz en el indice del soldado.
+   726                                  revisar_celda_derecha:
+   727 0000071B 4C8B5301                    mov r10, [rbx+1]; +1 = a la derecha de la posicion actual
+   728 0000071F 4180FA58                    cmp r10b, 'X'
+   729 00000723 7402                        je revisar_captura_derecha
+   730 00000725 EB0E                        jmp revisar_celda_abajo_derecha
+   731                                  revisar_captura_derecha:
+   732 00000727 4C8B5302                    mov r10, [rbx+2] ;+2 = a la derecha 2posiciones de la posicion actual
+   733 0000072B 4180FA20                    cmp r10b, ' '
+   734 0000072F 0F84A9000000                je oficiales_pueden_comer
+   735                                  
+   736                                  revisar_celda_abajo_derecha:
+   737 00000735 4C8B530A                    mov r10, [rbx+10]; +10 = a la derecha abajo de la posicion actual
+   738 00000739 4180FA58                    cmp r10b, 'X'
+   739 0000073D 7402                        je revisar_captura_abajo_derecha
+   740 0000073F EB0E                        jmp revisar_celda_abajo
+   741                                  revisar_captura_abajo_derecha:
+   742 00000741 4C8B5314                    mov r10, [rbx+20] ;+2 = a la derecha abajo 2posiciones de la posicion actual
+   743 00000745 4180FA20                    cmp r10b, ' '
+   744 00000749 0F848F000000                je oficiales_pueden_comer
+   745                                  
+   746                                  revisar_celda_abajo:
+   747 0000074F 4C8B5309                    mov r10, [rbx+9]; +1 = abajo de la posicion actual
+   748 00000753 4180FA58                    cmp r10b, 'X'
+   749 00000757 7402                        je revisar_captura_abajo
+   750 00000759 EB0A                        jmp revisar_celda_abajo_izquierda
+   751                                  revisar_captura_abajo:
+   752 0000075B 4C8B5312                    mov r10, [rbx+18] ;+2 = abajo 2posiciones de la posicion actual
+   753 0000075F 4180FA20                    cmp r10b, ' '
+   754 00000763 7479                        je oficiales_pueden_comer
+   755                                  
+   756                                  revisar_celda_abajo_izquierda:
+   757 00000765 4C8B5308                    mov r10, [rbx+8]
+   758 00000769 4180FA58                    cmp r10b, 'X'
+   759 0000076D 7402                        je revisar_captura_abajo_izquierda
+   760 0000076F EB0A                        jmp revisar_celda_izquierda
+   761                                  revisar_captura_abajo_izquierda:
+   762 00000771 4C8B5310                    mov r10, [rbx+16]
+   763 00000775 4180FA20                    cmp r10b, ' '
+   764 00000779 7463                        je oficiales_pueden_comer
+   765                                  
+   766                                  revisar_celda_izquierda:
+   767 0000077B 4C8B53FF                    mov r10, [rbx-1]
+   768 0000077F 4180FA58                    cmp r10b, 'X'
+   769 00000783 7402                        je revisar_captura_izquierda
+   770 00000785 EB0A                        jmp revisar_celda_arriba_izquierda
+   771                                  revisar_captura_izquierda:
+   772 00000787 4C8B53FE                    mov r10, [rbx-2]
+   773 0000078B 4180FA20                    cmp r10b, ' '
+   774 0000078F 744D                        je oficiales_pueden_comer
+   775                                  
+   776                                  revisar_celda_arriba_izquierda:
+   777 00000791 4C8B53F6                    mov r10, [rbx-10]
+   778 00000795 4180FA58                    cmp r10b, 'X'
+   779 00000799 7402                        je revisar_captura_arriba_izquierda
+   780 0000079B EB0A                        jmp revisar_celda_arriba
+   781                                  revisar_captura_arriba_izquierda:
+   782 0000079D 4C8B53EC                    mov r10, [rbx-20]
+   783 000007A1 4180FA20                    cmp r10b, ' '
+   784 000007A5 7437                        je oficiales_pueden_comer
+   785                                  
+   786                                  revisar_celda_arriba:
+   787 000007A7 4C8B53F7                    mov r10, [rbx-9]
+   788 000007AB 4180FA58                    cmp r10b, 'X'
+   789 000007AF 7402                        je revisar_captura_arriba
+   790 000007B1 EB0A                        jmp revisar_celda_arriba_derecha
+   791                                  revisar_captura_arriba:
+   792 000007B3 4C8B53EE                    mov r10, [rbx-18]
+   793 000007B7 4180FA20                    cmp r10b, ' '
+   794 000007BB 7421                        je oficiales_pueden_comer
+   795                                  
+   796                                  revisar_celda_arriba_derecha:
+   797 000007BD 4C8B53F8                    mov r10, [rbx-8]
+   798 000007C1 4180FA58                    cmp r10b, 'X'
+   799 000007C5 7402                        je revisar_captura_arriba_derecha
+   800 000007C7 EB0A                        jmp oficiales_no_pueden_comer ;fin de validaciones
+   801                                  revisar_captura_arriba_derecha:
+   802 000007C9 4C8B53F0                    mov r10, [rbx-16]
+   803 000007CD 4180FA20                    cmp r10b, ' '
+   804 000007D1 740B                        je oficiales_pueden_comer
+   805                                  
+   806                                  oficiales_no_pueden_comer:
+   807 000007D3 41BD00000000                mov r13, 0 ;se resetea siempre antes que jueguen oficiales
+   808 000007D9 E968F8FFFF                  jmp fin_actualizar_tablero
+   809                                      
+   810                                  oficiales_pueden_comer:
+   811 000007DE 41BD01000000                mov r13, 1 ;se resetea siempre antes que jueguen oficiales
+   812 000007E4 E95DF8FFFF                  jmp fin_actualizar_tablero
+   813                                  
+   814                                  verificar_ganador:
+   815 000007E9 4983FE00                    cmp r14, 0
+   816 000007ED 0F8495000000                je ganaron_soldados_por_falta_oficiales
+   817                                  verificar_invasion:
+   818 000007F3 4829C9                      sub rcx, rcx
+   819 000007F6 4829C0                      sub rax, rax
+   820 000007F9 4829DB                      sub rbx, rbx
+   821 000007FC 4D29D2                      sub r10, r10
+   822 000007FF B005                        mov al, 5
+   823 00000801 41B809000000                mov r8, cantidadFilas
+   824 00000807 49F7E8                      imul r8
+   825 0000080A 4801C1                      add rcx,rax
+   826                                      
+   827 0000080D B003                        mov al, 3
+   828 0000080F 41B801000000                mov r8, longitudElemento 
+   829 00000815 49F7E8                      imul r8
+   830 00000818 4801C1                      add rcx,rax
+   831                                      
+   832 0000081B 48BB-                       mov rbx,matriz 
+   832 0000081D [BA01000000000000] 
+   833 00000825 4801CB                      add rbx,rcx ;me posicione en la matriz
+   834                                  
+   835                                  ;fila_5_fortaleza
+   836 00000828 4C8B13                      mov r10, [rbx] ;guardo un elemento
+   837 0000082B 4180FA58                    cmp r10b, 'X'
+   838 0000082F 7552                        jne no_invadieron_la_fortaleza
+   839 00000831 4C8B5301                    mov r10, [rbx+1] ;guardo un elemento
+   840 00000835 4180FA58                    cmp r10b, 'X'
+   841 00000839 7548                        jne no_invadieron_la_fortaleza
+   842 0000083B 4C8B5302                    mov r10, [rbx+2] ;guardo un elemento
+   843 0000083F 4180FA58                    cmp r10b, 'X'
+   844 00000843 753E                        jne no_invadieron_la_fortaleza
+   845                                  ;fila_6_fortaleza
+   846 00000845 4C8B5309                    mov r10, [rbx+9] ;guardo un elemento
+   847 00000849 4180FA58                    cmp r10b, 'X'
+   848 0000084D 7534                        jne no_invadieron_la_fortaleza
+   849 0000084F 4C8B530A                    mov r10, [rbx+10] ;guardo un elemento
+   850 00000853 4180FA58                    cmp r10b, 'X'
+   851 00000857 752A                        jne no_invadieron_la_fortaleza
+   852 00000859 4C8B530B                    mov r10, [rbx+11] ;guardo un elemento
+   853 0000085D 4180FA58                    cmp r10b, 'X'
+   854 00000861 7520                        jne no_invadieron_la_fortaleza
+   855                                  ;fila_7_fortaleza
+   856 00000863 4C8B5312                    mov r10, [rbx+18] ;guardo un elemento
+   857 00000867 4180FA58                    cmp r10b, 'X'
+   858 0000086B 7516                        jne no_invadieron_la_fortaleza
+   859 0000086D 4C8B5313                    mov r10, [rbx+19] ;guardo un elemento
+   860 00000871 4180FA58                    cmp r10b, 'X'
+   861 00000875 750C                        jne no_invadieron_la_fortaleza
+   862 00000877 4C8B5314                    mov r10, [rbx+20] ;guardo un elemento
+   863 0000087B 4180FA58                    cmp r10b, 'X'
+   864 0000087F 7502                        jne no_invadieron_la_fortaleza
+   865                                  
+   866 00000881 EB26                        jmp ganaron_soldados_por_invasion
+   867                                      
+   868                                  no_invadieron_la_fortaleza:
+   869 00000883 E9C8F7FFFF                  jmp fin_verificar_ganador
+   870                                  
+   871                                  ganaron_soldados_por_falta_oficiales:
+   872 00000888 E8E3F7FFFF                  call mostrar_tablero
+   873 0000088D 48BF-                       mov rdi,msj_ganaron_soldados_por_falta_oficiales
+   873 0000088F [F700000000000000] 
+   874 00000897 4883EC08                    sub rsp, 8
+   875 0000089B E8(00000000)                call printf
+   876 000008A0 4883C408                    add rsp,8
+   877 000008A4 E9A9F7FFFF                  jmp fin
+   878                                  
+   879                                  ganaron_soldados_por_invasion:
+   880 000008A9 E8C2F7FFFF                  call mostrar_tablero
+   881 000008AE 48BF-                       mov rdi,msj_ganaron_soldados_por_invasion
+   881 000008B0 [4501000000000000] 
+   882 000008B8 4883EC08                    sub rsp, 8
+   883 000008BC E8(00000000)                call printf
+   884 000008C1 4883C408                    add rsp,8
+   885 000008C5 E988F7FFFF                  jmp fin
+   886                                  
+   887                                  
+   888                                  
+   889                                  validar_movimiento_soldado:
+   890 000008CA B800000000                  mov rax,0
+   891                                      
+   892 000008CF 8A0425[36000000]            mov al, [posx_fin]
+   893 000008D6 8A2425[34000000]            mov ah, [posx_ini]
+   894 000008DD 28E0                        sub al, ah
+   895                                  
+   896 000008DF 3C00                        cmp al, 0
+   897 000008E1 7415                        je validar_movimiento_soldado_horizontal
+   898 000008E3 3CFF                        cmp al,-1 
+   899 000008E5 0F84D6000000                je validar_movimiento_soldado_arriba
+   900 000008EB 3C01                        cmp al, 1
+   901 000008ED 0F845C010000                je validar_movimiento_soldado_abajo
+   902 000008F3 E9CFFDFFFF                  jmp movimiento_soldado_invalido
+   903                                      
+   904                                  ;fn terminada
+   905                                  validar_movimiento_soldado_horizontal:
+   906 000008F8 B800000000                  mov rax,0
+   907 000008FD 8A0425[34000000]            mov al, [posx_ini]
+   908                                  
+   909 00000904 3C07                        cmp al, 7
+   910 00000906 740D                        je validar_movimiento_soldado_horizontal_fila_siete_seis
+   911 00000908 3C06                        cmp al, 6
+   912 0000090A 7409                        je validar_movimiento_soldado_horizontal_fila_siete_seis
+   913 0000090C 3C05                        cmp al, 5
+   914 0000090E 7451                        je validar_movimiento_soldado_horizontal_fila_cinco
+   915                                  
+   916 00000910 E9B2FDFFFF                  jmp movimiento_soldado_invalido
+   917                                  
+   918                                  ;fn terminada
+   919                                  validar_movimiento_soldado_horizontal_fila_siete_seis:
+   920 00000915 BA00000000                  mov rdx,0
+   921 0000091A 8A1425[35000000]            mov dl, [posy_ini]
+   922 00000921 8A3425[37000000]            mov dh, [posy_fin]
+   923                                  
+   924 00000928 80FA03                      cmp dl, 3
+   925 0000092B 740F                        je validar_movimiento_soldado_horizontal_columna_tres_cinco
+   926 0000092D 80FA04                      cmp dl, 4
+   927 00000930 7418                        je validar_movimiento_soldado_horizontal_columna_cuatro
+   928 00000932 80FA05                      cmp dl, 5
+   929 00000935 7405                        je validar_movimiento_soldado_horizontal_columna_tres_cinco
+   930 00000937 E98BFDFFFF                  jmp movimiento_soldado_invalido
+   931                                  
+   932                                  validar_movimiento_soldado_horizontal_columna_tres_cinco:
+   933 0000093C 80FE04                      cmp dh, 4
+   934 0000093F 0F84A7FDFFFF                je movimiento_soldado_valido
+   935 00000945 E97DFDFFFF                  jmp movimiento_soldado_invalido
+   936                                  
+   937                                  validar_movimiento_soldado_horizontal_columna_cuatro:
+   938 0000094A 80FE03                      cmp dh, 3
+   939 0000094D 0F8499FDFFFF                je movimiento_soldado_valido
+   940 00000953 80FE05                      cmp dh, 5
+   941 00000956 0F8490FDFFFF                je movimiento_soldado_valido
+   942 0000095C E966FDFFFF                  jmp movimiento_soldado_invalido
+   943                                  
+   944                                  validar_movimiento_soldado_horizontal_fila_cinco:
+   945 00000961 BA00000000                  mov rdx,0
+   946 00000966 8A1425[35000000]            mov dl, [posy_ini]
+   947 0000096D 8A3425[37000000]            mov dh, [posy_fin]
+   948                                      
+   949 00000974 80FA03                      cmp dl, 3
+   950 00000977 7E0F                        jle movimiento_soldado_derecha
+   951 00000979 80FA04                      cmp dl, 4
+   952 0000097C 742A                        je movimiento_soldado_derecha_izquierda
+   953 0000097E 80FA07                      cmp dl, 7
+   954 00000981 7E15                        jle movimiento_soldado_izquierda
+   955 00000983 E93FFDFFFF                  jmp movimiento_soldado_invalido
+   956                                  
+   957                                  movimiento_soldado_derecha:
+   958 00000988 28D6                        sub dh,dl
+   959 0000098A 80FE01                      cmp dh, 1
+   960 0000098D 0F8459FDFFFF                je movimiento_soldado_valido
+   961 00000993 E92FFDFFFF                  jmp movimiento_soldado_invalido
+   962                                  
+   963                                  movimiento_soldado_izquierda:
+   964 00000998 28D6                        sub dh,dl
+   965 0000099A 80FEFF                      cmp dh,-1
+   966 0000099D 0F8449FDFFFF                je movimiento_soldado_valido
+   967 000009A3 E91FFDFFFF                  jmp movimiento_soldado_invalido
+   968                                  
+   969                                  movimiento_soldado_derecha_izquierda:
+   970 000009A8 28D6                        sub dh,dl
+   971 000009AA 80FEFF                      cmp dh,-1
+   972 000009AD 0F8439FDFFFF                je movimiento_soldado_valido
+   973 000009B3 80FE01                      cmp dh, 1
+   974 000009B6 0F8430FDFFFF                je movimiento_soldado_valido
+   975 000009BC E906FDFFFF                  jmp movimiento_soldado_invalido
+   976                                  
+   977                                  ;;fin validar movimientos horizontales
+   978                                  validar_movimiento_soldado_arriba:
+   979 000009C1 B800000000                  mov rax,0
+   980 000009C6 8A0425[34000000]            mov al, [posx_ini]
+   981                                      
+   982 000009CD 3C06                        cmp al, 6
+   983 000009CF 7409                        je validar_movimiento_soldado_arriba_en_fortaleza
+   984 000009D1 3C07                        cmp al, 7
+   985 000009D3 7405                        je validar_movimiento_soldado_arriba_en_fortaleza
+   986 000009D5 E9EDFCFFFF                  jmp movimiento_soldado_invalido
+   987                                  
+   988                                  validar_movimiento_soldado_arriba_en_fortaleza:
+   989 000009DA BA00000000                  mov rdx,0
+   990 000009DF 8A1425[35000000]            mov dl, [posy_ini]
+   991 000009E6 8A3425[37000000]            mov dh, [posy_fin]
+   992                                  
+   993 000009ED 80FA03                      cmp dl, 3
+   994 000009F0 740F                        je validar_movimiento_soldado_arriba_en_fortaleza_columna_tres
+   995 000009F2 80FA04                      cmp dl, 4
+   996 000009F5 7421                        je validar_movimiento_soldado_arriba_en_fortaleza_columna_cuatro
+   997 000009F7 80FA05                      cmp dl, 5
+   998 000009FA 743C                        je validar_movimiento_soldado_arriba_en_fortaleza_columna_cinco
+   999 000009FC E9C6FCFFFF                  jmp movimiento_soldado_invalido
+  1000                                  
+  1001                                  validar_movimiento_soldado_arriba_en_fortaleza_columna_tres:
+  1002 00000A01 80FE03                      cmp dh, 3
+  1003 00000A04 0F84E2FCFFFF                je movimiento_soldado_valido
+  1004 00000A0A 80FE04                      cmp dh, 4
+  1005 00000A0D 0F84D9FCFFFF                je movimiento_soldado_valido
+  1006 00000A13 E9AFFCFFFF                  jmp movimiento_soldado_invalido
+  1007                                  
+  1008                                  validar_movimiento_soldado_arriba_en_fortaleza_columna_cuatro:
+  1009 00000A18 80FE03                      cmp dh, 3
+  1010 00000A1B 0F84CBFCFFFF                je movimiento_soldado_valido
+  1011 00000A21 80FE04                      cmp dh, 4
+  1012 00000A24 0F84C2FCFFFF                je movimiento_soldado_valido
+  1013 00000A2A 80FE05                      cmp dh, 5
+  1014 00000A2D 0F84B9FCFFFF                je movimiento_soldado_valido
+  1015 00000A33 E98FFCFFFF                  jmp movimiento_soldado_invalido
+  1016                                  
+  1017                                  validar_movimiento_soldado_arriba_en_fortaleza_columna_cinco:
+  1018 00000A38 80FE04                      cmp dh, 4
+  1019 00000A3B 0F84ABFCFFFF                je movimiento_soldado_valido
+  1020 00000A41 80FE05                      cmp dh, 5
+  1021 00000A44 0F84A2FCFFFF                je movimiento_soldado_valido
+  1022 00000A4A E978FCFFFF                  jmp movimiento_soldado_invalido
+  1023                                  
+  1024                                  validar_movimiento_soldado_abajo:
+  1025 00000A4F BA00000000                  mov rdx,0
+  1026 00000A54 8A1425[35000000]            mov dl, [posy_ini]
+  1027 00000A5B 8A3425[37000000]            mov dh, [posy_fin]
+  1028                                      
+  1029 00000A62 28D6                        sub dh, dl
+  1030 00000A64 80FEFF                      cmp dh,-1
+  1031 00000A67 0F847FFCFFFF                je movimiento_soldado_valido
+  1032 00000A6D 80FE00                      cmp dh, 0
+  1033 00000A70 0F8476FCFFFF                je movimiento_soldado_valido
+  1034 00000A76 80FE01                      cmp dh, 1
+  1035 00000A79 0F846DFCFFFF                je movimiento_soldado_valido
+  1036 00000A7F E943FCFFFF                  jmp movimiento_soldado_invalido
+  1037                                  
+  1038                                  ;;fin validar_movimiento_soldado
+  1039 00000A84 E9B8F5FFFF                  jmp prox_turno
