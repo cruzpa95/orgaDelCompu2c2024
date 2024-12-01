@@ -1,0 +1,21 @@
+para probar movimientos de soldados, comentar esta linea: call actualizar_turno
+
+movimientos de soldado que fallan:
+-fila 6 a fila 5 rompe (no deberia)
+-75 a 65 rompe (no deb)
+
+; call revision_oficial_desentendido
+revision_oficial_desentendido:
+;r11 r13 r15 -> voy a usar 
+    ;antes de terminar un turno seteo r11 en 0, y ademas tengo que revisar si alguno puede comer.
+        ;si alguno puede comer, guardo en r13 un 1. -> COMO??
+        ;si ninguno puede comer, guardo en r13 un 0.
+    ;luego del movimiento_oficial
+        ;si comio, guardo 1 en r11 (movimiento doble) -> esta ok y no hay desentendimiento.
+        ;si no comio, hay un 0 en r11 (movimiento simple) -> chequear r13
+            ;si r13 = 1 -> borramos al oficial (del destino donde cayo)
+
+eliminar_oficial:
+    ;actualizar matriz
+    ;dec r14
+    ret

@@ -43,15 +43,15 @@ section .data
     turno db 1
     divisor db 2 
     
-    matriz  db '~1234567',0
-            db '1~|XXX|~',0
-            db '2~|XXX|~',0
-            db '3XXXXXXX',0
-            db '4XX XXXX',0
-            db '5XX X XX',0
-            db '6~|  O|~',0
-            db '7~|O  |~',0
-            db '--------',0
+    matriz  db ' 1234567',0
+            db '1 |   | ',0
+            db '2_|   |_',0
+            db '3   X   ',0
+            db '4       ',0
+            db '5       ',0
+            db '6~|   |~',0
+            db '7 |   | ',0
+
 
 section .bss    
     buffer		resb	10
@@ -195,25 +195,25 @@ validar_movimiento_soldado_arriba_en_fortaleza:
 
 validar_movimiento_soldado_arriba_en_fortaleza_columna_tres:
     cmp dh, 3
-    je movimiento_soldado_valido
+    je movimiento_oficial_ok
     cmp dh, 4
-    je movimiento_soldado_valido
+    je movimiento_oficial_ok
     jmp movimiento_soldado_invalido
 
 validar_movimiento_soldado_arriba_en_fortaleza_columna_cuatro:
     cmp dh, 3
-    je movimiento_soldado_valido
+    je movimiento_oficial_ok
     cmp dh, 4
-    je movimiento_soldado_valido
+    je movimiento_oficial_ok
     cmp dh, 5
-    je movimiento_soldado_valido
+    je movimiento_oficial_ok
     jmp movimiento_soldado_invalido
 
 validar_movimiento_soldado_arriba_en_fortaleza_columna_cinco:
     cmp dh, 4
-    je movimiento_soldado_valido
+    je movimiento_oficial_ok
     cmp dh, 5
-    je movimiento_soldado_valido
+    je movimiento_oficial_ok
     jmp movimiento_soldado_invalido
 
 validar_movimiento_soldado_abajo:
@@ -234,8 +234,9 @@ validar_movimiento_soldado_abajo:
     jmp prox_turno
     
 prox_turno:
-    call actualizar_turno
+    ;call actualizar_turno
     call actualizar_tablero
+    call eliminar_oficial_desentendido
     call verificar_ganador
     jmp ciclo_juego      ; Repite el bucle
         
@@ -763,12 +764,8 @@ validar_habia_soldado_en_movimiento_doble:
 
     mov r10, [rbx] ;guardo un elemento
     cmp r10b, 'X'
-    je oficial_realizo_captura
+    je movimiento_oficial_ok
     jmp movimiento_oficial_invalido
-
-oficial_realizo_captura:
-    mov r15, 1
-    jmp movimiento_oficial_ok
 
 ;;fin;; validaciones terminan en estas 2 funciones.
 movimiento_oficial_ok:
@@ -779,48 +776,9 @@ movimiento_oficial_ok:
     
     ;despues de agregar el nuevo valor, agregarle el resto de la matriz que estaba antes.
     mov [rbx+1],r9
-    mov r12,0 ;si r12=0, movimiento OK
-;si se desentendio borrar el oficial que se movio.
-    add r15, r13
-    cmp r15, 1
-    je borrar_oficial
-    ;else termina turno oficiales
-termina_turno_oficiales:
+
+    mov r12,0
     ret
-borrar_oficial:
-;voy a la posicion destino y borro el "O"
-    sub rcx, rcx
-    sub rax, rax
-    sub rbx, rbx
-    sub r10, r10
-    mov al,[posx_fin] ;guardo el valor de la fila, en AL(8bits) 
-                    ;ya que posx es db (byte= 8bits) sino guarda cualquier cosa
-;    sub rax,1 -> no es necesaria la resta ya que la matriz empieza en 1,1
-    mov r8, cantidadFilas
-    imul r8   ;me desplazo en la fila
-    add rcx,rax
-    
-    mov al,[posy_fin] ;guardo el valor de la col,
-;    sub rax,1
-    mov r8, longitudElemento ;guardo en r8 para darle longitud y poder multiplicar usando imul
-    imul r8 ;me desplazo en la columna
-    add rcx,rax ;sumo los desplazamientos
-    
-    
-    mov rbx,matriz ;pongo el pto al inicio de la matriz
-    add rbx,rcx ;me posicione en la matriz
-
-    mov r10, [rbx] ;guardo un elemento
-    mov r9, [rbx+1] ;guardo en r9 lo que le sigue de matriz posterior al elemento a actualizar
-    mov r8, "Y" ; lo muevo a un reg para darle (y estar seguro de su) longitud
-    mov [rbx],r8 ;muevo el valor(de igual longitud). muevo a la posicion de la matriz a actualizar
-    
-    ;despues de agregar el nuevo valor, agregarle el resto de la matriz que estaba antes.
-    mov [rbx+1],r9
-    
-    dec r14 ;descuento un oficial
-    jmp termina_turno_oficiales
-
 movimiento_oficial_invalido:
     mov rdi,msj_movimiento_oficial_invalido
     sub rsp, 8
@@ -842,115 +800,10 @@ no_restar_rsp:
     jmp pedir_movimiento
 
 movimiento_soldado_valido:
-    mov r15, 0 ;reseteo r15
-    call validar_si_oficial_puede_comer_en_el_proximo_turno
     jmp prox_turno
 
-validar_si_oficial_puede_comer_en_el_proximo_turno:
-    ;encontrar oficial_1 (solo con el desplazamiento)
-    sub rcx, rcx
-    sub rax, rax
-    sub rbx, rbx
-    sub r10, r10
-    
-    mov rbx,matriz ;pongo el pto al inicio de la matriz
-actualizo_indice:
-    mov r10, [rbx] ;guardo el oficial_1
-    cmp r10b, 'O'
-    je revisar_si_oficial_puede_comer
-    inc rbx
-    jmp actualizo_indice
-
-
-;;;;;;;;aca viene lo bueno
-revisar_si_oficial_puede_comer:
-    ;tengo en rbx la matriz en el indice del soldado.
-revisar_celda_derecha:
-    mov r10, [rbx+1]; +1 = a la derecha de la posicion actual
-    cmp r10b, 'X'
-    je revisar_captura_derecha
-    jmp revisar_celda_abajo_derecha
-revisar_captura_derecha:
-    mov r10, [rbx+2] ;+2 = a la derecha 2posiciones de la posicion actual
-    cmp r10b, ' '
-    je oficiales_pueden_comer
-
-revisar_celda_abajo_derecha:
-    mov r10, [rbx+10]; +10 = a la derecha abajo de la posicion actual
-    cmp r10b, 'X'
-    je revisar_captura_abajo_derecha
-    jmp revisar_celda_abajo
-revisar_captura_abajo_derecha:
-    mov r10, [rbx+20] ;+2 = a la derecha abajo 2posiciones de la posicion actual
-    cmp r10b, ' '
-    je oficiales_pueden_comer
-
-revisar_celda_abajo:
-    mov r10, [rbx+9]; +1 = abajo de la posicion actual
-    cmp r10b, 'X'
-    je revisar_captura_abajo
-    jmp revisar_celda_abajo_izquierda
-revisar_captura_abajo:
-    mov r10, [rbx+18] ;+2 = abajo 2posiciones de la posicion actual
-    cmp r10b, ' '
-    je oficiales_pueden_comer
-
-revisar_celda_abajo_izquierda:
-    mov r10, [rbx+8]
-    cmp r10b, 'X'
-    je revisar_captura_abajo_izquierda
-    jmp revisar_celda_izquierda
-revisar_captura_abajo_izquierda:
-    mov r10, [rbx+16]
-    cmp r10b, ' '
-    je oficiales_pueden_comer
-
-revisar_celda_izquierda:
-    mov r10, [rbx-1]
-    cmp r10b, 'X'
-    je revisar_captura_izquierda
-    jmp revisar_celda_arriba_izquierda
-revisar_captura_izquierda:
-    mov r10, [rbx-2]
-    cmp r10b, ' '
-    je oficiales_pueden_comer
-
-revisar_celda_arriba_izquierda:
-    mov r10, [rbx-10]
-    cmp r10b, 'X'
-    je revisar_captura_arriba_izquierda
-    jmp revisar_celda_arriba
-revisar_captura_arriba_izquierda:
-    mov r10, [rbx-20]
-    cmp r10b, ' '
-    je oficiales_pueden_comer
-
-revisar_celda_arriba:
-    mov r10, [rbx-9]
-    cmp r10b, 'X'
-    je revisar_captura_arriba
-    jmp revisar_celda_arriba_derecha
-revisar_captura_arriba:
-    mov r10, [rbx-18]
-    cmp r10b, ' '
-    je oficiales_pueden_comer
-
-revisar_celda_arriba_derecha:
-    mov r10, [rbx-8]
-    cmp r10b, 'X'
-    je revisar_captura_arriba_derecha
-    jmp oficiales_no_pueden_comer ;fin de validaciones
-revisar_captura_arriba_derecha:
-    mov r10, [rbx-16]
-    cmp r10b, ' '
-    je oficiales_pueden_comer
-
-;;;;;;;;aca termina lo bueno
-oficiales_pueden_comer:
-    mov r13, 1 ;se resetea siempre antes que jueguen oficiales
-    ret
-oficiales_no_pueden_comer:
-    mov r13, 0 ;se resetea siempre antes que jueguen oficiales
+eliminar_oficial_desentendido:
+    ;dec r14
     ret
 
 verificar_ganador:
