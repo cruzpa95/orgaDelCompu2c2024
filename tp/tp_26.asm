@@ -830,10 +830,8 @@ revisar_captura_arriba_derecha:
     je oficiales_pueden_comer
 
 oficiales_no_pueden_comer:
-    cmp rdx, 1
-    je buscar_proximo_oficial
     mov r13, 0 ;se resetea siempre antes que jueguen oficiales
-    jmp fin_actualizar_tablero
+    jmp buscar_proximo_oficial
     
 oficiales_pueden_comer:
     mov r13, 1 ;se resetea siempre antes que jueguen oficiales
