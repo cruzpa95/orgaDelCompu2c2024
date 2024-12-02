@@ -46,13 +46,13 @@ section .data
     divisor db 2 
     
     matriz  db '~1234567',0
-            db '1~|   |~',0
-            db '2~|OX |~',0
-            db '3   O   ',0
-            db '4       ',0
-            db '5       ',0
-            db '6~|   |~',0
-            db '7~|   |~',0
+            db '1~|XXX|~',0
+            db '2~|XXX|~',0
+            db '3XXXXXXX',0
+            db '4XXXXXXX',0
+            db '5XX   XX',0
+            db '6~|  O|~',0
+            db '7~|O  |~',0
             db '--------',0
 
 section .bss    
