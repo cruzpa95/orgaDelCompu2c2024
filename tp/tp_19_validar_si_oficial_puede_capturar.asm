@@ -43,7 +43,7 @@ section .data
     turno db 1
     divisor db 2 
     
-    matriz  db '~1234567',0
+    matriz  db ' 1234567',0
             db '1~|XXX|~',0
             db '2~|XXX|~',0
             db '3XXXXXXX',0
@@ -236,6 +236,7 @@ validar_movimiento_soldado_abajo:
 prox_turno:
     call actualizar_turno
     call actualizar_tablero
+    call revision_oficial_desentendido
     call verificar_ganador
     jmp ciclo_juego      ; Repite el bucle
         
@@ -767,7 +768,7 @@ validar_habia_soldado_en_movimiento_doble:
     jmp movimiento_oficial_invalido
 
 oficial_realizo_captura:
-    mov r15, 1
+    mov r11, 1
     jmp movimiento_oficial_ok
 
 ;;fin;; validaciones terminan en estas 2 funciones.
@@ -779,10 +780,10 @@ movimiento_oficial_ok:
     
     ;despues de agregar el nuevo valor, agregarle el resto de la matriz que estaba antes.
     mov [rbx+1],r9
-    mov r12,0 ;si r12=0, movimiento OK
+    mov r12,0
 ;si se desentendio borrar el oficial que se movio.
-    add r15, r13
-    cmp r15, 1
+    add r11, r13
+    cmp r11, 1
     je borrar_oficial
     ;else termina turno oficiales
 termina_turno_oficiales:
@@ -817,8 +818,6 @@ borrar_oficial:
     
     ;despues de agregar el nuevo valor, agregarle el resto de la matriz que estaba antes.
     mov [rbx+1],r9
-    
-    dec r14 ;descuento un oficial
     jmp termina_turno_oficiales
 
 movimiento_oficial_invalido:
@@ -842,7 +841,7 @@ no_restar_rsp:
     jmp pedir_movimiento
 
 movimiento_soldado_valido:
-    mov r15, 0 ;reseteo r15
+    mov r11, 0 ;reseteo r11
     call validar_si_oficial_puede_comer_en_el_proximo_turno
     jmp prox_turno
 
@@ -855,10 +854,11 @@ validar_si_oficial_puede_comer_en_el_proximo_turno:
     
     mov rbx,matriz ;pongo el pto al inicio de la matriz
 actualizo_indice:
+    add rbx,rcx ;me posicione en la matriz
     mov r10, [rbx] ;guardo el oficial_1
     cmp r10b, 'O'
     je revisar_si_oficial_puede_comer
-    inc rbx
+    inc rcx
     jmp actualizo_indice
 
 
@@ -873,7 +873,7 @@ revisar_celda_derecha:
 revisar_captura_derecha:
     mov r10, [rbx+2] ;+2 = a la derecha 2posiciones de la posicion actual
     cmp r10b, ' '
-    je oficiales_pueden_comer
+    je oficiales_no_pueden_comer
 
 revisar_celda_abajo_derecha:
     mov r10, [rbx+10]; +10 = a la derecha abajo de la posicion actual
@@ -883,7 +883,7 @@ revisar_celda_abajo_derecha:
 revisar_captura_abajo_derecha:
     mov r10, [rbx+20] ;+2 = a la derecha abajo 2posiciones de la posicion actual
     cmp r10b, ' '
-    je oficiales_pueden_comer
+    je oficiales_no_pueden_comer
 
 revisar_celda_abajo:
     mov r10, [rbx+9]; +1 = abajo de la posicion actual
@@ -893,7 +893,7 @@ revisar_celda_abajo:
 revisar_captura_abajo:
     mov r10, [rbx+18] ;+2 = abajo 2posiciones de la posicion actual
     cmp r10b, ' '
-    je oficiales_pueden_comer
+    je oficiales_no_pueden_comer
 
 revisar_celda_abajo_izquierda:
     mov r10, [rbx+8]
@@ -903,7 +903,7 @@ revisar_celda_abajo_izquierda:
 revisar_captura_abajo_izquierda:
     mov r10, [rbx+16]
     cmp r10b, ' '
-    je oficiales_pueden_comer
+    je oficiales_no_pueden_comer
 
 revisar_celda_izquierda:
     mov r10, [rbx-1]
@@ -913,7 +913,7 @@ revisar_celda_izquierda:
 revisar_captura_izquierda:
     mov r10, [rbx-2]
     cmp r10b, ' '
-    je oficiales_pueden_comer
+    je oficiales_no_pueden_comer
 
 revisar_celda_arriba_izquierda:
     mov r10, [rbx-10]
@@ -923,7 +923,7 @@ revisar_celda_arriba_izquierda:
 revisar_captura_arriba_izquierda:
     mov r10, [rbx-20]
     cmp r10b, ' '
-    je oficiales_pueden_comer
+    je oficiales_no_pueden_comer
 
 revisar_celda_arriba:
     mov r10, [rbx-9]
@@ -933,7 +933,7 @@ revisar_celda_arriba:
 revisar_captura_arriba:
     mov r10, [rbx-18]
     cmp r10b, ' '
-    je oficiales_pueden_comer
+    je oficiales_no_pueden_comer
 
 revisar_celda_arriba_derecha:
     mov r10, [rbx-8]
@@ -943,14 +943,31 @@ revisar_celda_arriba_derecha:
 revisar_captura_arriba_derecha:
     mov r10, [rbx-16]
     cmp r10b, ' '
-    je oficiales_pueden_comer
+    je oficiales_no_pueden_comer
 
 ;;;;;;;;aca termina lo bueno
 oficiales_pueden_comer:
-    mov r13, 1 ;se resetea siempre antes que jueguen oficiales
+    mov r13, 1
     ret
 oficiales_no_pueden_comer:
-    mov r13, 0 ;se resetea siempre antes que jueguen oficiales
+    mov r13, 0
+    ret
+
+revision_oficial_desentendido:
+;r11 r13 r15
+    ;[listo]antes de terminar un turno seteo r11 en 0 de soldado,
+    ; [falta] y ademas tengo que revisar si alguno puede comer.
+        ;[listo]si alguno puede comer, guardo en r13 un 1. -> COMO??
+        ;[listo]si ninguno puede comer, guardo en r13 un 0.
+    ;luego del movimiento_oficial
+        ;si comio, guardo 1 en r11 (movimiento doble) -> esta ok y no hay desentendimiento.
+        ;si no comio, hay un 0 en r11 (movimiento simple) -> chequear r13
+            ;si r13 = 1 -> borramos al oficial (del destino donde cayo)
+
+eliminar_oficial:
+    ;actualizar matriz
+
+    dec r14
     ret
 
 verificar_ganador:

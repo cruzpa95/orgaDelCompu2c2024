@@ -20,23 +20,23 @@ main:
     mov rbp, rsp ; for correct debugging
 
     mov esi, 0
-    mov rcx, 36 
+    mov rcx, 36 ;36 filas
     mov ebx, tabla
     mov rax, 0
 
 ne:
     add ax, [ebx+esi] ;ax = 16bits -> 2 bytes
     add si, 30 ;15 columnas de 2bytes
-    loop ne ;ax=15
+    loop ne ; ax=36 decimal, 24hexa
 
-    mov ah, [da]
+    mov ah, [da] ;ax = 47 24 ;hexa
     
     
     mov edx, tx ; rdx = 'hola0' 68 6F 6C 61 30
-    mov edi, 2 
+    mov edi, 2 ;; se mueve 2 posiciones, es decir que modifica desde el 3er elemento de modo little endian
     
     mov [edx + edi], ax ; 68 6F 24 47 30 -> ho$G0
-    mov rdi, tx    
+    mov rdi, tx    ;rdi apunta a tx (donde estaba hola0 pero ahora sobreescrito)
     sub rsp, 8
     call puts   ;imprime ho$G0 en tx, pero sigue leyendo la memoria hasta un 0 -> ho$G0123
     add rsp, 8

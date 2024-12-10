@@ -1,0 +1,2 @@
+#!/bin/sh
+mono ~/dotnet/ARMSim-201/ARMSim.exe &> ~/.ARMSimLogFile

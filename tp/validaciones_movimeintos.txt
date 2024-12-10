@@ -90,6 +90,11 @@ OK:
 
 
 
+###############
+me falta indicar por que desaparece un oficial.
+
+
+msj_movimiento_oficial_desatendido
 
 
 
@@ -97,11 +102,27 @@ OK:
 
 
 
+####
+aca se rompe la matrix
+
+ganaron_soldados_por_falta_oficiales
+
+mov rax, rsp
+    and rax, 15
+    je no_restar_rsp_1
+    sub rsp, 8
+no_restar_rsp_1:
 
 
 
 
 
+
+
+52
+63
+73
+53
 
 
 

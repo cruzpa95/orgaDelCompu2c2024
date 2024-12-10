@@ -21,23 +21,22 @@ main:
     mov rax, 0
 
 
-;La siguiente porcion corresponde al segmento de datos de un programa Intel    
-ne:
+
+ne: ;La siguiente porcion corresponde al segmento de datos de un programa Intel    
     add ax, [ebx+esi] ;ax = 16bits -> 2 bytes
     add si, 30 ;15 columnas de 2bytes
-    loop ne
-;ax = 15
-    mov ah, [da]
-;ax = 7115
-;En el loop se realiza la sumatoria de los elementos de la primer columna de la tabla cuya dimensión es Respuesta
-;36
-; filas x  Respuesta
-;15
-; columnas
+    loop ne ;ax = 15
+    mov ah, [da] ;ax = 7115
 
-    ;ax=? 15;
-;primera parte.
-;El mismo programa continúa con la siguiente porción de código:
+    mov r13,0    ;En el loop se realiza la sumatoria de los elementos de la primer columna de la tabla cuya dimensión es Respuesta
+    mov r13,0;36
+    mov r13,0    ; filas x  Respuesta
+    mov r13,0;15
+    mov r13,0; columnas
+
+    mov r13,0;ax=? 15;
+    mov r13,0;primera parte.
+    mov r13,0;El mismo programa continúa con la siguiente porción de código:
          
     mov [edx + edi], ax
     mov rdi, tx    
@@ -45,9 +44,9 @@ ne:
     call puts
     add rsp, 8
     
-;El mismo programa continúa con la siguiente porción de código:
 
-    dec cl
+
+    dec cl ;El mismo programa continúa con la siguiente porción de código:
     mov esi, tx
     mov edi, ty
     repe movsb
@@ -56,7 +55,7 @@ ne:
     call puts
     add rsp, 8
     
-;El mismo programa continúa con la siguiente porción de código:
+    mov r13,0 ;El mismo programa continúa con la siguiente porción de código:
     mov cx,7
     repe cmpsb
     je uno
